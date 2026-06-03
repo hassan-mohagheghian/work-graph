@@ -2,6 +2,7 @@ from sqlalchemy import Boolean, Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.future import select
 from src.config.database import Base
+from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 
 class UserModel(Base):
@@ -13,5 +14,5 @@ class UserModel(Base):
     display_name = Column(String, nullable=True)
     password_hash = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=True)

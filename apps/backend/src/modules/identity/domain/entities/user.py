@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID, uuid4
 from datetime import datetime
+from datetime import timezone
 
 
 @dataclass
@@ -9,10 +10,10 @@ class User:
     username: str
     display_name: str
     email: str
-    is_active: bool = True
-    created_at: datetime = datetime.now(tz=datetime.timezone.utc)
-    updated_at: datetime = datetime.now(tz=datetime.timezone.utc)
     password_hash: str
+    is_active: bool = True
+    created_at: datetime = datetime.now(tz=timezone.utc)
+    updated_at: datetime = datetime.now(tz=timezone.utc)
 
     @staticmethod
     def create(
