@@ -1,0 +1,6 @@
+services:
+  postgres:
+    image: postgres:latest
+
+  redis:
+    image: redis:latest
