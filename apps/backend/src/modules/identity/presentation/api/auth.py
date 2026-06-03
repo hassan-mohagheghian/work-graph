@@ -1,5 +1,11 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, EmailStr
+from src.modules.identity.domain.services.password_hasher import (
+    PasswordHasher,
+)
+from src.modules.identity.infrastructure.security.argon2_password_hasher import (
+    Argon2PasswordHasher,
+)
 from src.modules.identity.application.commands.register_user import RegisterUserCommand
 from src.modules.identity.application.handlers.register_user_handler import (
     RegisterUerHandler,
@@ -26,15 +32,21 @@ async def get_user_repo():
         yield SQLAlchemyUserRepository(session=session)
 
 
+async def get_password_hasher():
+    Argon2PasswordHasher
+
+
 @router.post("/auth/register")
 async def register_user(
-    req: RegisterUserRequest, repo: SQLAlchemyUserRepository = Depends(get_user_repo)
+    req: RegisterUserRequest,
+    repo: SQLAlchemyUserRepository = Depends(get_user_repo),
 ):
-    handler = RegisterUerHandler(repo)
+
+    handler = RegisterUerHandler(repo, password_hasher=Argon2PasswordHasher())
     command = RegisterUserCommand(
         email=req.email,
         display_name=req.display_name,
-        password_hash=req.password,  # for MVP, hash later
+        password=req.password,  # for MVP, hash later
     )
     user = await handler.handle(command=command)
     return {
