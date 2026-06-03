@@ -1,5 +1,5 @@
 from sqlalchemy.future import select
-from src.modules.identity.infrastructure.models import UserModel
+from src.modules.identity.infrastructure.persistence.models import UserModel
 from src.modules.identity.domain.entities.user import User
 from src.modules.identity.domain.repositories.user_repository import UserRepository
 

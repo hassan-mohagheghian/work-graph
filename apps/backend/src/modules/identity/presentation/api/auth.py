@@ -41,7 +41,6 @@ async def register_user(
     req: RegisterUserRequest,
     repo: SQLAlchemyUserRepository = Depends(get_user_repo),
 ):
-
     handler = RegisterUerHandler(repo, password_hasher=Argon2PasswordHasher())
     command = RegisterUserCommand(
         email=req.email,

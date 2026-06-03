@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Self
 from uuid import UUID, uuid4
 from datetime import datetime
 from datetime import timezone
@@ -16,7 +17,7 @@ class User:
     updated_at: datetime = datetime.now(tz=timezone.utc)
 
     @staticmethod
-    def create(display_name: str, email: str, password_hash: str) -> "User":
+    def create(display_name: str, email: str, password_hash: str) -> Self:
         return User(
             id=uuid4(),
             display_name=display_name,

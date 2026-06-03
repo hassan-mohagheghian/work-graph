@@ -6,7 +6,9 @@ from sqlalchemy import pool
 from alembic import context
 
 from src.config.database import Base
-from src.modules.identity.infrastructure.models import UserModel
+from apps.backend.src.modules.identity.infrastructure.persistence.models import (
+    UserModel,
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
