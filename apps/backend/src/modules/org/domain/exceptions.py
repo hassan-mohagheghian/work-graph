@@ -1,0 +1,2 @@
+class OrganizationAlreadyExistsError(Exception):
+    pass

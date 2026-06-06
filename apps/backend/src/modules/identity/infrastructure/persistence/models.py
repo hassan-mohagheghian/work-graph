@@ -1,14 +1,12 @@
-from sqlalchemy import Boolean, Column, DateTime, String
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.future import select
-from src.config.database import Base
+from sqlalchemy import Boolean, Column, String
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
+from src.shared.infrastructure.persistence.base import Base, UUIDMixin
 
-class UserModel(Base):
+
+class UserModel(UUIDMixin, Base):
     __tablename__ = "users"
 
-    id = Column(PG_UUID(as_uuid=True), primary_key=True)
     email = Column(String, unique=True, nullable=False, index=True)
     username = Column(String, unique=True, nullable=True)
     display_name = Column(String, nullable=True)
