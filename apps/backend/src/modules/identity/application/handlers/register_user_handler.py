@@ -1,3 +1,4 @@
+from src.modules.identity.domain.exceptions import UserAlreadyExistsError
 from src.modules.identity.domain.ports.password_hasher import PasswordHasher
 from src.modules.identity.application.commands.register_user import RegisterUserCommand
 from src.modules.identity.domain.entities.user import User
@@ -12,6 +13,8 @@ class RegisterUerHandler:
         self.password_hasher = password_hasher
 
     async def handle(self, command: RegisterUserCommand) -> User:
+        if await self.user_repo.get_by_email(email=command.email):
+            raise UserAlreadyExistsError("User already exists")
 
         hashed_password = self.password_hasher.hash(password=command.password)
         user = User.create(

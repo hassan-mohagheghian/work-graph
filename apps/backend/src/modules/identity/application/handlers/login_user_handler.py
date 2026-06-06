@@ -1,5 +1,6 @@
 from src.modules.identity.application.dtos.login_result_dto import LoginResultDTO
 from src.modules.identity.application.queries.login_user_query import LoginUserQuery
+from src.modules.identity.domain.exceptions import InvalidCredentialsError
 from src.modules.identity.domain.ports import PasswordHasher
 from src.modules.identity.domain.ports.token_provider import TokenProvider
 from src.modules.identity.domain.repositories import UserRepository
@@ -20,10 +21,10 @@ class LoginUserHandler:
     async def handle(self, query: LoginUserQuery) -> LoginResultDTO:
         user: UserModel | None = await self.user_repo.get_by_email(query.email)
         if not user:
-            raise ValueError("Invalid credentials")
+            raise InvalidCredentialsError("Invalid email or password")
         if not self.password_hasher.verify(
             password=query.password, hashed=user.password_hash
         ):
-            raise ValueError("Invalid credentials")
+            raise InvalidCredentialsError("Invalid email or password")
         token = self.token_provider.generate_token(str(user.id))
         return LoginResultDTO(access_token=token)

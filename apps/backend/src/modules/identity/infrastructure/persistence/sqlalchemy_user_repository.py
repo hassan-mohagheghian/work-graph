@@ -4,10 +4,11 @@ from sqlalchemy.future import select
 from src.modules.identity.domain.entities.user import User
 from src.modules.identity.infrastructure.persistence.models import UserModel
 from src.modules.identity.domain.repositories.user_repository import UserRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class SQLAlchemyUserRepository(UserRepository):
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
     async def add(self, user: User) -> None:
@@ -26,7 +27,7 @@ class SQLAlchemyUserRepository(UserRepository):
             updated_at=user.updated_at,
         )
         self.session.add(user_model)
-        # Do NOT commit
+        await self.session.commit()
 
     async def get_by_email(self, email: str) -> User | None:
         result = await self.session.execute(
