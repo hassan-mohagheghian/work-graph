@@ -1,8 +1,5 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, EmailStr
-from src.modules.identity.domain.services.password_hasher import (
-    PasswordHasher,
-)
 from src.modules.identity.infrastructure.security.argon2_password_hasher import (
     Argon2PasswordHasher,
 )

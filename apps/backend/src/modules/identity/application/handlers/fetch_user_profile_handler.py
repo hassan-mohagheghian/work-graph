@@ -1,4 +1,4 @@
-from src.modules.identity.domain.dtos.user_profile import UserProfile
+from src.modules.identity.application.dtos import UserProfile
 from src.modules.identity.domain.repositories import UserRepository
 
 

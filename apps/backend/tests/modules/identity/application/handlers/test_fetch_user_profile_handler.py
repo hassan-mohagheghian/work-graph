@@ -1,37 +1,36 @@
+# apps/backend/tests/modules/identity/application/test_fetch_user_profile_handler.py
+
 import pytest
+from datetime import datetime, timezone
+import uuid
+
 from src.modules.identity.application.handlers.fetch_user_profile_handler import (
     FetchUserProfileHandler,
 )
-
-
-from src.modules.identity.infrastructure.persistence.models import UserModel
-
-from datetime import datetime, timezone
-import uuid
+from src.modules.identity.domain.entities.user import User
 
 
 @pytest.mark.asyncio
 async def test_fetch_user_profile(user_repo):
-    # Arrange: create a user in the database
-
-    user = UserModel(
+    # --- Arrange ---
+    user = User(
         id=uuid.uuid4(),
-        email="test3@example.com",
+        email="test@example.com",
+        username="testuser",
         display_name="Test User",
         password_hash="hashed_password",
         is_active=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
-
     await user_repo.add(user)
 
-    # Act: fetch user profile
+    # --- Act ---
     handler = FetchUserProfileHandler(user_repo=user_repo)
     result = await handler.handle(email=user.email)
 
-    # Assert: verify profile data
+    # --- Assert ---
     assert result.id == user.id
     assert result.email == user.email
     assert result.display_name == user.display_name
-    assert not hasattr(result, "password_hash")  # never return password
+    assert not hasattr(result, "password_hash")

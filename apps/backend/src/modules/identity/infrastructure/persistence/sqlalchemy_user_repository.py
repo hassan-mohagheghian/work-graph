@@ -1,6 +1,8 @@
+# src/modules/identity/infrastructure/persistence/sqlalchemy_user_repository.py
+
 from sqlalchemy.future import select
-from src.modules.identity.infrastructure.persistence.models import UserModel
 from src.modules.identity.domain.entities.user import User
+from src.modules.identity.infrastructure.persistence.models import UserModel
 from src.modules.identity.domain.repositories.user_repository import UserRepository
 
 
@@ -9,6 +11,10 @@ class SQLAlchemyUserRepository(UserRepository):
         self.session = session
 
     async def add(self, user: User) -> None:
+        """
+        Map domain user -> persistence model
+        Do NOT commit inside tests — rollback is handled by fixture
+        """
         user_model = UserModel(
             id=user.id,
             email=user.email,
@@ -20,7 +26,7 @@ class SQLAlchemyUserRepository(UserRepository):
             updated_at=user.updated_at,
         )
         self.session.add(user_model)
-        await self.session.commit()
+        # Do NOT commit
 
     async def get_by_email(self, email: str) -> User | None:
         result = await self.session.execute(

@@ -1,4 +1,6 @@
-from src.modules.identity.domain.services.password_hasher import PasswordHasher
+from src.modules.identity.domain.ports.password_hasher import (
+    PasswordHasher,
+)
 from argon2 import PasswordHasher as Argon2Hasher
 
 

@@ -1,4 +1,4 @@
-from src.modules.identity.domain.services.password_hasher import PasswordHasher
+from src.modules.identity.domain.ports.password_hasher import PasswordHasher
 from src.modules.identity.application.commands.register_user import RegisterUserCommand
 from src.modules.identity.domain.entities.user import User
 from src.modules.identity.domain.repositories import UserRepository
