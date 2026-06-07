@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status
-from src.config.database import AsyncSessionLocal
 from src.modules.identity.api.auth_router import get_current_user_id
 from src.modules.organization.application.handlers.create_org_handler import (
     CreateOrgHandler,
@@ -8,6 +7,7 @@ from src.modules.organization.domain.exceptions import OrganizationAlreadyExists
 from src.modules.organization.infrastructure.persistence.sqlalchemy_organization_repository import (
     SQLAlchemyOrganizationRepository,
 )
+from src.shared.config.database import AsyncSessionLocal
 
 router = APIRouter(prefix="/org", tags=["Organizations"])
 

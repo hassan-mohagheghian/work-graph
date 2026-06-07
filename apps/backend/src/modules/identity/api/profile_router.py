@@ -5,9 +5,7 @@ from src.modules.identity.application.handlers.fetch_user_profile_handler import
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
-from src.config.database import AsyncSessionLocal
-
-from fastapi import APIRouter
+from src.shared.config.database import AsyncSessionLocal
 
 router = APIRouter(prefix="/user", tags=["user"])
 

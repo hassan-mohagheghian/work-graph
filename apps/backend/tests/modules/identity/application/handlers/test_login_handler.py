@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from unittest.mock import ANY
 
 import pytest
-from src.config.settings import settings
 from src.modules.identity.application.dtos.login_result_dto import LoginResultDTO
 from src.modules.identity.application.handlers.login_user_handler import (
     LoginUserHandler,
@@ -16,6 +15,7 @@ from src.modules.identity.infrastructure.security.argon2_password_hasher import 
 from src.modules.identity.infrastructure.token.jwt_token_provider import (
     JWTTokenProvider,
 )
+from src.shared.config.settings import settings
 
 
 @pytest.mark.asyncio

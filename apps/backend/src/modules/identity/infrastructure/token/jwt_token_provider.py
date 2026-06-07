@@ -1,8 +1,8 @@
 import datetime
 
 import jwt
-from src.config.settings import settings
 from src.modules.identity.domain.ports.token_provider import TokenProvider
+from src.shared.config.settings import settings
 
 
 class JWTTokenProvider(TokenProvider):

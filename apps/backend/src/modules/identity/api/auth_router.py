@@ -2,8 +2,6 @@ import jwt
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
-from src.config.database import AsyncSessionLocal
-from src.config.settings import settings
 from src.modules.identity.application.commands.register_user import RegisterUserCommand
 from src.modules.identity.application.handlers.login_user_handler import (
     LoginUserHandler,
@@ -21,6 +19,8 @@ from src.modules.identity.infrastructure.security.argon2_password_hasher import 
 from src.modules.identity.infrastructure.token.jwt_token_provider import (
     JWTTokenProvider,
 )
+from src.shared.config.database import AsyncSessionLocal
+from src.shared.config.settings import settings
 
 # I want it takes email and password in body
 

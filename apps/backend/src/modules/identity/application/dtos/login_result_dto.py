@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.config.settings import settings
+from src.shared.config.settings import settings
 
 
 @dataclass
