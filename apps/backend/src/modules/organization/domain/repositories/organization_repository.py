@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from uuid import UUID
 
 from src.modules.organization.domain.identities.organization import Organization
 
@@ -10,9 +11,12 @@ class OrganizationRepository(ABC):
         Raises:
             - OrganizationAlreadyExistsError
         """
-
         pass
 
     @abstractmethod
     async def get_by_name(self, name: str) -> Organization | None:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, org_id: UUID) -> Organization | None:
         pass

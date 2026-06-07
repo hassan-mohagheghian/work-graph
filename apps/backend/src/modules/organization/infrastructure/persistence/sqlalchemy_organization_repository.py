@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.organization.domain.identities.organization import Organization
@@ -27,6 +29,23 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
             select(OrganizationModel).where(OrganizationModel.name == name)
         )
         org_model = result.scalar_one_or_none()
+        if not org_model:
+            return None
+
+        return Organization(
+            id=org_model.id,
+            name=org_model.name,
+            created_at=org_model.created_at,
+            owner_id=org_model.owner_id,
+        )
+
+    async def get_by_id(self, org_id: UUID) -> Organization:
+
+        result = await self.session.execute(
+            select(OrganizationModel).where(OrganizationModel.id == org_id)
+        )
+        org_model = result.scalar_one_or_none()
+
         if not org_model:
             return None
 

@@ -1,7 +1,15 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, status
 from src.modules.identity.api.auth_router import get_current_user_id
-from src.modules.organization.application.handlers.create_org_handler import (
+from src.modules.organization.application.commands.create_org_handler import (
     CreateOrgHandler,
+)
+from src.modules.organization.application.queries.get_org.get_org_handler import (
+    GetOrgHandler,
+)
+from src.modules.organization.application.queries.get_org.get_org_query import (
+    GetOrgQuery,
 )
 from src.modules.organization.domain.exceptions import OrganizationAlreadyExistsError
 from src.modules.organization.infrastructure.persistence.sqlalchemy_organization_repository import (
@@ -23,7 +31,6 @@ async def create_org(
 ):
     handler = CreateOrgHandler(org_repo=repo)
     try:
-        print("---------------------------------", user_id)
         org = await handler.handle(name=name, owner_id=user_id)
         return {
             "id": str(org.id),
@@ -33,3 +40,10 @@ async def create_org(
         }
     except OrganizationAlreadyExistsError as e:
         return {"detail": str(e)}
+
+
+@router.get("/{org_id}")
+async def get_org(org_id: UUID, repo=Depends(get_org_repo)):
+    handler = GetOrgHandler(org_repo=repo)
+    query = GetOrgQuery(org_id=org_id)
+    return await handler.handle(query=query)

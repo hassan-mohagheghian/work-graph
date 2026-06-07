@@ -1,10 +1,11 @@
-import pytest
-import uuid
-from datetime import datetime, timezone
+from datetime import datetime
+from uuid import uuid4
 
-from src.modules.org.domain.identities import Organization
-from src.modules.org.application.handlers import CreateOrgHandler
-from src.modules.org.infrastructure.persistence.sqlalchemy_organization_repository import (
+import pytest
+from src.modules.organization.application.commands.create_org_handler import (
+    CreateOrgHandler,
+)
+from src.modules.organization.infrastructure.persistence.sqlalchemy_organization_repository import (
     SQLAlchemyOrganizationRepository,
 )
 
@@ -22,11 +23,12 @@ async def test_create_organization(async_session):
     handler = CreateOrgHandler(org_repo=org_repo)
 
     org_name = "Acme Corp"
+    owner_id = uuid4()
 
     # -------------------------
     # Act: create organization
     # -------------------------
-    org = await handler.handle(name=org_name)
+    org = await handler.handle(name=org_name, owner_id=owner_id)
 
     # -------------------------
     # Assert: verify persisted entity

@@ -4,6 +4,7 @@ from src.modules.identity.domain.exceptions import (
     InvalidCredentialsError,
     UserAlreadyExistsError,
 )
+from src.modules.organization.domain.exceptions import OrganizationNotFoundError
 
 
 def register_exception_handlers(app):
@@ -23,4 +24,11 @@ def register_exception_handlers(app):
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
             content={"detail": str(exc) or "User already exists"},
+        )
+
+    @app.exception_handler(UserAlreadyExistsError)
+    async def org_not_found_handler(request: Request, exc: OrganizationNotFoundError):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": str(exc) or "Organization not found"},
         )

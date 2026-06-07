@@ -25,7 +25,8 @@ async def test_login_success(user_repo):
     # -------------------------
     password_hasher = Argon2PasswordHasher()
     token_provider = JWTTokenProvider(
-        secret_key="test_secret_at_least_must_be_32_chars"
+        secret_key="test_secret_at_least_must_be_32_chars",
+        algorithm=settings.JWT_ALGORITHM,
     )
 
     raw_password = "StrongPassword123!"

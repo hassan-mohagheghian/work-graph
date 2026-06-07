@@ -12,7 +12,6 @@ class CreateOrgHandler:
     async def handle(self, name: str, owner_id: str) -> Organization:
         existing = await self.org_repo.get_by_name(name)
         if existing:
-            print("-----------------", "yes")
             raise OrganizationAlreadyExistsError(f"Organization {name} already exits.")
         org = Organization(name=name, owner_id=owner_id)
         await self.org_repo.add(organization=org)

@@ -1,13 +1,12 @@
+import uuid
 from abc import ABC
 from typing import Self
 from uuid import UUID
-import uuid
 
 
 class Entity(ABC):
-
-    def __init__(self, id: UUID):
-        self.id = uuid.uuid4()
+    def __init__(self, id: UUID | None = None):
+        self.id = id or uuid.uuid4()
 
     def __eq__(self, other: Self):
         if isinstance(other, self.__class__):
