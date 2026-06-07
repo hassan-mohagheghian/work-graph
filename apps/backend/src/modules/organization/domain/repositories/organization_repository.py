@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.modules.org.domain.identities.organization import Organization
+from src.modules.organization.domain.identities.organization import Organization
 
 
 class OrganizationRepository(ABC):

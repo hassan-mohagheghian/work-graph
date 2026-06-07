@@ -1,17 +1,13 @@
 from sqlalchemy import select
-
-from src.modules.org.domain.identities.organization import Organization
-from src.modules.org.domain.repositories.organization_repository import (
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.modules.organization.domain.identities.organization import Organization
+from src.modules.organization.domain.repositories.organization_repository import (
     OrganizationRepository,
 )
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.modules.org.infrastructure.persistence.models import OrganizationModel
+from src.modules.organization.infrastructure.persistence.models import OrganizationModel
 
 
 class SQLAlchemyOrganizationRepository(OrganizationRepository):
-
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -19,6 +15,7 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
         org_model = OrganizationModel(
             id=organization.id,
             name=organization.name,
+            owner_id=organization.owner_id,
             created_at=organization.created_at,
         )
 
@@ -34,5 +31,8 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
             return None
 
         return Organization(
-            id=org_model.id, name=org_model.name, created_at=org_model.created_at
+            id=org_model.id,
+            name=org_model.name,
+            created_at=org_model.created_at,
+            owner_id=org_model.owner_id,
         )

@@ -1,8 +1,8 @@
-"""init org tables
+"""create org table 
 
-Revision ID: 2b41a2198dbf
+Revision ID: 95d39e26ea22
 Revises: 
-Create Date: 2026-06-06 17:05:47.205447
+Create Date: 2026-06-06 19:08:04.156663
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '2b41a2198dbf'
+revision: str = '95d39e26ea22'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,6 +24,7 @@ def upgrade() -> None:
     op.create_table('organizations',
     sa.Column('name', sa.String(length=200), nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(timezone=True), nullable=False),
+    sa.Column('owner_id', sa.UUID(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')

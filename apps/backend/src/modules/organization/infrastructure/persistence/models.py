@@ -12,3 +12,4 @@ class OrganizationModel(UUIDMixin, Base):
 
     name = Column(String(200), unique=True, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False)
+    owner_id: uuid.UUID = Column(PG_UUID(as_uuid=True), nullable=False)

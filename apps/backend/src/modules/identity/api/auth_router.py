@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from src.modules.identity.application.handlers.login_user_handler import (
     LoginUserHandler,
@@ -18,8 +18,27 @@ from src.config.database import AsyncSessionLocal
 from src.modules.identity.infrastructure.token.jwt_token_provider import (
     JWTTokenProvider,
 )
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+import jwt
+
+# I want it takes email and password in body
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 secret_key = "sdfkj3l4j200()&*^&23jkjfkdfkjfkjwekr&*372jkjfkdf"
+
+
+def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
+    try:
+        payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+        user_id: str = payload.get("sub")  # 'sub' is usually user ID in JWT
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return user_id
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
 
 router = APIRouter(
     prefix="/auth",
@@ -34,7 +53,7 @@ class RegisterUserRequest(BaseModel):
 
 
 class LoginUserRequest(BaseModel):
-    email: EmailStr
+    username: EmailStr
     password: str
 
 
@@ -47,7 +66,7 @@ async def get_password_hasher():
     Argon2PasswordHasher
 
 
-@router.post("/auth/register")
+@router.post("/register")
 async def register_user(
     req: RegisterUserRequest,
     repo: SQLAlchemyUserRepository = Depends(get_user_repo),
@@ -56,7 +75,7 @@ async def register_user(
     command = RegisterUserCommand(
         email=req.email,
         display_name=req.display_name,
-        password=req.password,  # for MVP, hash later
+        password=req.password,
     )
     user = await handler.handle(command=command)
     return {
@@ -66,9 +85,9 @@ async def register_user(
     }
 
 
-@router.post("/auth/login")
+@router.post("/login")
 async def login_user(
-    req: LoginUserRequest,
+    req: OAuth2PasswordRequestForm = Depends(),
     repo: SQLAlchemyUserRepository = Depends(get_user_repo),
 ):
     handler = LoginUserHandler(
@@ -76,5 +95,5 @@ async def login_user(
         password_hasher=Argon2PasswordHasher(),
         token_provider=JWTTokenProvider(secret_key=secret_key),
     )
-    query = LoginUserQuery(email=req.email, password=req.password)
+    query = LoginUserQuery(email=req.username, password=req.password)
     return await handler.handle(query=query)
