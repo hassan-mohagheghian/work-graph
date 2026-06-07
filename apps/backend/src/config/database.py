@@ -1,9 +1,8 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from src.config.settings import settings
 
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/workgraph"
-
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(settings.DATABASE_URL, echo=True)
 
 AsyncSessionLocal = sessionmaker(
     bind=engine,

@@ -1,9 +1,9 @@
+import uuid
+from datetime import datetime, timezone
 from unittest.mock import ANY
 
 import pytest
-from datetime import datetime, timezone
-import uuid
-
+from src.config.settings import settings
 from src.modules.identity.application.dtos.login_result_dto import LoginResultDTO
 from src.modules.identity.application.handlers.login_user_handler import (
     LoginUserHandler,
@@ -66,5 +66,5 @@ async def test_login_success(user_repo):
     assert result == LoginResultDTO(
         access_token=ANY,
         token_type="bearer",
-        expires_in=3600,
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
     )

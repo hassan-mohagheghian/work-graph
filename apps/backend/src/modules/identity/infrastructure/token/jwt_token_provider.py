@@ -1,13 +1,20 @@
-import jwt
 import datetime
 
+import jwt
+from src.config.settings import settings
 from src.modules.identity.domain.ports.token_provider import TokenProvider
 
 
 class JWTTokenProvider(TokenProvider):
-    def __init__(self, secret_key: str, expires_in: int = 3600):
+    def __init__(
+        self,
+        secret_key: str,
+        algorithm: str,
+        expires_in: int = settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+    ):
         self.secret_key = secret_key
         self.expires_in = expires_in
+        self.algorithm = algorithm
 
     def generate_token(self, user_id: str) -> str:
         payload = {
@@ -15,4 +22,4 @@ class JWTTokenProvider(TokenProvider):
             "exp": datetime.datetime.now(datetime.timezone.utc)
             + datetime.timedelta(seconds=self.expires_in),
         }
-        return jwt.encode(payload, self.secret_key, algorithm="HS256")
+        return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)

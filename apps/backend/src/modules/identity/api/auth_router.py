@@ -1,37 +1,37 @@
+import jwt
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
+from src.config.database import AsyncSessionLocal
+from src.config.settings import settings
+from src.modules.identity.application.commands.register_user import RegisterUserCommand
 from src.modules.identity.application.handlers.login_user_handler import (
     LoginUserHandler,
 )
-from src.modules.identity.application.queries.login_user_query import LoginUserQuery
-from src.modules.identity.infrastructure.security.argon2_password_hasher import (
-    Argon2PasswordHasher,
-)
-from src.modules.identity.application.commands.register_user import RegisterUserCommand
 from src.modules.identity.application.handlers.register_user_handler import (
     RegisterUerHandler,
 )
+from src.modules.identity.application.queries.login_user_query import LoginUserQuery
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
-from src.config.database import AsyncSessionLocal
+from src.modules.identity.infrastructure.security.argon2_password_hasher import (
+    Argon2PasswordHasher,
+)
 from src.modules.identity.infrastructure.token.jwt_token_provider import (
     JWTTokenProvider,
 )
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-import jwt
 
 # I want it takes email and password in body
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-secret_key = "sdfkj3l4j200()&*^&23jkjfkdfkjfkjwekr&*372jkjfkdf"
-
 
 def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
     try:
-        payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
         user_id: str = payload.get("sub")  # 'sub' is usually user ID in JWT
         if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid token")
@@ -93,7 +93,9 @@ async def login_user(
     handler = LoginUserHandler(
         user_repo=repo,
         password_hasher=Argon2PasswordHasher(),
-        token_provider=JWTTokenProvider(secret_key=secret_key),
+        token_provider=JWTTokenProvider(
+            secret_key=settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM
+        ),
     )
     query = LoginUserQuery(email=req.username, password=req.password)
     return await handler.handle(query=query)
