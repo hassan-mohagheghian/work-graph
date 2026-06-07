@@ -20,3 +20,7 @@ class OrganizationRepository(ABC):
     @abstractmethod
     def get_by_id(self, org_id: UUID) -> Organization | None:
         pass
+
+    @abstractmethod
+    def list_by_owner(self, owner_id: UUID) -> list[Organization]:
+        pass

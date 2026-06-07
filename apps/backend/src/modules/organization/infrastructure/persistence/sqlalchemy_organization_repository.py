@@ -55,3 +55,19 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
             created_at=org_model.created_at,
             owner_id=org_model.owner_id,
         )
+
+    async def list_by_owner(self, owner_id: UUID) -> list[Organization]:
+        result = await self.session.execute(
+            select(OrganizationModel).where(OrganizationModel.owner_id == owner_id)
+        )
+
+        org_list = result.scalars()
+        return [
+            Organization(
+                id=org.id,
+                name=org.name,
+                created_at=org.created_at,
+                owner_id=org.owner_id,
+            )
+            for org in org_list
+        ]

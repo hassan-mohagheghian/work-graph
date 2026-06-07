@@ -11,6 +11,12 @@ from src.modules.organization.application.queries.get_org.get_org_handler import
 from src.modules.organization.application.queries.get_org.get_org_query import (
     GetOrgQuery,
 )
+from src.modules.organization.application.queries.list_by_owner.list_by_owner_handler import (
+    ListOrgsByOwnerHandler,
+)
+from src.modules.organization.application.queries.list_by_owner.list_by_owner_query import (
+    ListOrgsByOwnerQuery,
+)
 from src.modules.organization.domain.exceptions import OrganizationAlreadyExistsError
 from src.modules.organization.infrastructure.persistence.sqlalchemy_organization_repository import (
     SQLAlchemyOrganizationRepository,
@@ -46,4 +52,13 @@ async def create_org(
 async def get_org(org_id: UUID, repo=Depends(get_org_repo)):
     handler = GetOrgHandler(org_repo=repo)
     query = GetOrgQuery(org_id=org_id)
+    return await handler.handle(query=query)
+
+
+@router.get("")
+async def list_orgs_by_owner(
+    user_id: str = Depends(get_current_user_id), repo=Depends(get_org_repo)
+):
+    handler = ListOrgsByOwnerHandler(org_repo=repo)
+    query = ListOrgsByOwnerQuery(owner_id=user_id)
     return await handler.handle(query=query)
