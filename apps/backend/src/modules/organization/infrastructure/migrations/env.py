@@ -1,10 +1,9 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
-from src.modules.org.infrastructure.persistence.models import Base
+from sqlalchemy import engine_from_config, pool
+from src.modules.organization.infrastructure.persistence.base import Base
+from src.modules.organization.infrastructure.persistence.models import OrganizationModel, OrgMembershipModel  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -45,7 +44,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        version_table="alembic_version_org",
+        version_table="alembic_version_organization",
+        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -69,7 +69,8 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            version_table="alembic_version_org",
+            version_table="alembic_version_organization",
+            include_schemas=True,
         )
 
         with context.begin_transaction():

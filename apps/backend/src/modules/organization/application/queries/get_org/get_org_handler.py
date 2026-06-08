@@ -4,8 +4,8 @@ from src.modules.organization.application.queries.get_org.get_org_query import (
 from src.modules.organization.application.queries.get_org.get_org_response import (
     GetOrgResponse,
 )
+from src.modules.organization.domain.entities import Organization
 from src.modules.organization.domain.exceptions import OrganizationNotFoundError
-from src.modules.organization.domain.identities import Organization
 from src.modules.organization.domain.repositories.organization_repository import (
     OrganizationRepository,
 )

@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
 import uuid
+from datetime import datetime, timezone
 
 from src.modules.shared.domain.entity import Entity
 
@@ -8,7 +8,6 @@ class Organization(Entity):
     def __init__(
         self,
         name: str,
-        owner_id: str,
         id: uuid.UUID | None = None,
         created_at: datetime | None = None,
     ):
@@ -17,4 +16,3 @@ class Organization(Entity):
             raise ValueError("Organization name must be at least 1 characters")
         self.name = name
         self.created_at: datetime = created_at or datetime.now(timezone.utc)
-        self.owner_id = owner_id

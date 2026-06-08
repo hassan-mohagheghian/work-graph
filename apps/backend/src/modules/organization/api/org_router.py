@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 from src.modules.identity.api.auth_router import get_current_user_id
-from src.modules.organization.application.commands.create_org_handler import (
+from src.modules.organization.application.commands.create_org.handler import (
     CreateOrgHandler,
 )
 from src.modules.organization.application.queries.get_org.get_org_handler import (

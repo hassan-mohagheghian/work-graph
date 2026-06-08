@@ -1,43 +1,52 @@
-from datetime import datetime
-from uuid import uuid4
+import uuid
 
 import pytest
-from src.modules.organization.application.commands.create_org_handler import (
+from src.modules.organization.application.commands.create_org.command import (
+    CreateOrgCommand,
+)
+from src.modules.organization.application.commands.create_org.handler import (
     CreateOrgHandler,
 )
-from src.modules.organization.infrastructure.persistence.sqlalchemy_organization_repository import (
-    SQLAlchemyOrganizationRepository,
-)
+from src.modules.organization.domain.value_objects.role import OrgRole
 
 
 @pytest.mark.asyncio
-async def test_create_organization(async_session):
-    """
-    Test that CreateOrganizationHandler can persist a new organization.
-    """
+async def test_create_org_creates_owner_membership(org_repo, org_membership_repo):
+    # -------------------------
+    # Arrange
+    # -------------------------
+    handler = CreateOrgHandler(
+        org_repo=org_repo, org_membership_repo=org_membership_repo
+    )
+
+    owner_id = uuid.uuid4()
+
+    cmd = CreateOrgCommand(
+        name="Acme Corp",
+        owner_id=owner_id,
+    )
 
     # -------------------------
-    # Arrange: repository and handler
+    # Act
     # -------------------------
-    org_repo = SQLAlchemyOrganizationRepository(session=async_session)
-    handler = CreateOrgHandler(org_repo=org_repo)
-
-    org_name = "Acme Corp"
-    owner_id = uuid4()
+    result = await handler.handle(cmd)
 
     # -------------------------
-    # Act: create organization
+    # Assert: organization created
     # -------------------------
-    org = await handler.handle(name=org_name, owner_id=owner_id)
+    org = await org_repo.get_by_id(result.id)
+    assert org is not None
+    assert org.name == "Acme Corp"
 
     # -------------------------
-    # Assert: verify persisted entity
+    # Assert: membership created
     # -------------------------
-    assert org.id is not None
-    assert org.name == org_name
-    assert isinstance(org.created_at, datetime)
+    memberships = await org_membership_repo.list_by_org(result.id)
 
-    # Verify in DB
-    db_org = await org_repo.get_by_name(org.name)
-    assert db_org is not None
-    assert db_org.name == org_name
+    assert len(memberships) == 1
+
+    membership = memberships[0]
+
+    assert membership.user_id == owner_id
+    assert membership.org_id == result.id
+    assert membership.role == OrgRole.OWNER

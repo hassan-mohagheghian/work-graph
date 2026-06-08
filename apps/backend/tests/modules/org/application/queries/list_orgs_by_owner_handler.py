@@ -8,7 +8,7 @@ from src.modules.organization.application.queries.list_by_owner.list_by_owner_ha
 from src.modules.organization.application.queries.list_by_owner.list_by_owner_query import (
     ListOrganizationsByOwnerQuery,
 )
-from src.modules.organization.domain.identities.organization import Organization
+from src.modules.organization.domain.entities.organization import Organization
 
 
 @pytest.mark.asyncio

@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.modules.organization.domain.identities.organization import Organization
+from src.modules.organization.domain.entities.organization import Organization
 from src.modules.organization.domain.repositories.organization_repository import (
     OrganizationRepository,
 )
@@ -17,7 +17,6 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
         org_model = OrganizationModel(
             id=organization.id,
             name=organization.name,
-            owner_id=organization.owner_id,
             created_at=organization.created_at,
         )
 
@@ -50,10 +49,7 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
             return None
 
         return Organization(
-            id=org_model.id,
-            name=org_model.name,
-            created_at=org_model.created_at,
-            owner_id=org_model.owner_id,
+            id=org_model.id, name=org_model.name, created_at=org_model.created_at
         )
 
     async def list_by_owner(self, owner_id: UUID) -> list[Organization]:

@@ -1,15 +1,20 @@
-import uuid
-
-from sqlalchemy import TIMESTAMP, Column, String
-
+from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from src.modules.organization.infrastructure.persistence.base import Base
+from src.shared.infrastructure.persistence.base import CreateAtMixin, UUIDMixin
 
-from src.shared.infrastructure.persistence.base import Base, UUIDMixin
 
-
-class OrganizationModel(UUIDMixin, Base):
+class OrganizationModel(UUIDMixin, CreateAtMixin, Base):
+    __table_args__ = {"schema": "org"}
     __tablename__ = "organizations"
 
     name = Column(String(200), unique=True, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False)
-    owner_id: uuid.UUID = Column(PG_UUID(as_uuid=True), nullable=False)
+
+
+class OrgMembershipModel(UUIDMixin, CreateAtMixin, Base):
+    __table_args__ = {"schema": "org"}
+    __tablename__ = "organization_memberships"
+
+    org_id = Column(PG_UUID(as_uuid=True), index=True, nullable=False)
+    user_id = Column(PG_UUID(as_uuid=True), index=True, nullable=False)
+    role = Column(String, nullable=False)

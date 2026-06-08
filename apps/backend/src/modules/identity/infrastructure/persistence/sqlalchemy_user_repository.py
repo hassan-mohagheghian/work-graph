@@ -1,10 +1,10 @@
 # src/modules/identity/infrastructure/persistence/sqlalchemy_user_repository.py
 
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from src.modules.identity.domain.entities.user import User
-from src.modules.identity.infrastructure.persistence.models import UserModel
 from src.modules.identity.domain.repositories.user_repository import UserRepository
-from sqlalchemy.ext.asyncio import AsyncSession
+from src.modules.identity.infrastructure.persistence.models import UserModel
 
 
 class SQLAlchemyUserRepository(UserRepository):

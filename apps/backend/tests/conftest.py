@@ -2,16 +2,19 @@ import asyncio
 
 import asyncpg
 import pytest
+import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 from src.modules.identity.domain.repositories.user_repository import UserRepository
-from src.modules.identity.infrastructure.persistence.models import Base
+from src.modules.identity.infrastructure.persistence.models import Base as IdentityBase
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
+from src.modules.organization.infrastructure.persistence.models import Base as OrgBase
 
 DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/workgraph_test"
 ADMIN_DB_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
+SCHEMAS = ["identity", "org"]
 
 
 async def ensure_test_db():
@@ -30,6 +33,7 @@ async def ensure_test_db():
             print(f"✅ Database '{db_name}' created.")
         else:
             print(f"ℹ️ Database '{db_name}' already exists.")
+
     finally:
         await conn.close()
 
@@ -37,17 +41,31 @@ async def ensure_test_db():
 asyncio.run(ensure_test_db())
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 async def engine():
+    """
+    Creates an async SQLAlchemy engine, ensures schemas exist,
+    and creates all tables for the test database.
+    """
     engine = create_async_engine(DATABASE_URL, echo=False, poolclass=NullPool)
 
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        # ✅ Ensure all required schemas exist
+        for schema in SCHEMAS:
+            await conn.execute(sa.text(f'CREATE SCHEMA IF NOT EXISTS "{schema}"'))
+
+        # ✅ Create all tables in metadata
+        await conn.run_sync(IdentityBase.metadata.create_all)
+        await conn.run_sync(OrgBase.metadata.create_all)
 
     yield engine
 
+    # Teardown: drop tables and schemas after all tests
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(IdentityBase.metadata.drop_all)
+        await conn.run_sync(OrgBase.metadata.drop_all)
+        for schema in SCHEMAS:
+            await conn.execute(sa.text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE'))
 
     await engine.dispose()
 

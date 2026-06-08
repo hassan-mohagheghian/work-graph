@@ -4,3 +4,7 @@ class OrganizationAlreadyExistsError(Exception):
 
 class OrganizationNotFoundError(Exception):
     pass
+
+
+class OrgMembershipALreadyExistsError(Exception):
+    pass

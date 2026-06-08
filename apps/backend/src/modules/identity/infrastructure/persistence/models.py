@@ -1,10 +1,11 @@
 from sqlalchemy import Boolean, Column, String
 from sqlalchemy.dialects.postgresql import TIMESTAMP
-
-from src.shared.infrastructure.persistence.base import Base, UUIDMixin
+from src.modules.identity.infrastructure.persistence.base import Base
+from src.shared.infrastructure.persistence.base import UUIDMixin
 
 
 class UserModel(UUIDMixin, Base):
+    __table_args__ = {"schema": "identity"}
     __tablename__ = "users"
 
     email = Column(String, unique=True, nullable=False, index=True)
