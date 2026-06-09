@@ -1,6 +1,15 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
+from pydantic import BaseModel
+from src.modules.identity.api.auth_router import get_user_repo
+from src.modules.identity.domain.repositories.user_repository import UserRepository
+from src.modules.organization.application.commands.add_org_member.command import (
+    AddOrgMemberCommand,
+)
+from src.modules.organization.application.commands.add_org_member.handler import (
+    AddOrgMemberHandler,
+)
 from src.modules.organization.application.commands.create_org.command import (
     CreateOrgCommand,
 )
@@ -21,6 +30,9 @@ from src.modules.organization.application.queries.list_by_owner.list_by_owner_qu
 )
 from src.modules.organization.domain.entities.membership import OrgMembership
 from src.modules.organization.domain.exceptions import OrganizationAlreadyExistsError
+from src.modules.organization.domain.repositories.org_membership_repo import (
+    OrgMembershipRepo,
+)
 from src.modules.organization.domain.value_objects.role import OrgRole
 from src.modules.organization.infrastructure.persistence.sqlalchemy_membership_repo import (
     SQLAlchemyOrgMembershipRepo,
@@ -90,3 +102,30 @@ async def secure_org_data(
     membership: OrgMembership = Depends(require_org_role(OrgRole.OWNER)),
 ):
     return {"msg": f"User {membership.user_id} is OWNER and can access this"}
+
+
+class AddMemberRequest(BaseModel):
+    user_id: str
+    role: str
+
+
+@router.post("/{org_id}/members")
+async def add_member(
+    org_id: str,
+    body: AddMemberRequest,
+    current_membership=Depends(require_org_role(OrgRole.OWNER)),
+    membership_repo: OrgMembershipRepo = Depends(get_org_membership_repo),
+    user_repo: UserRepository = Depends(get_user_repo),
+):
+    handler = AddOrgMemberHandler(
+        org_membership_repo=membership_repo,
+        user_repo=user_repo,
+    )
+
+    cmd = AddOrgMemberCommand(
+        org_id=org_id,
+        user_id=body.user_id,
+        role=body.role,
+    )
+
+    return await handler.handle(cmd=cmd, current_user_membership=current_membership)
