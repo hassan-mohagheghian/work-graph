@@ -44,4 +44,4 @@ jobs:
 
       - name: Run tests
         working-directory: apps/backend
-        run: uv run pytest --cov=src
+        run: uv run pytest --cov=src --cov-fail-under=80
