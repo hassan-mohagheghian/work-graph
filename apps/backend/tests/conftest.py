@@ -1,18 +1,14 @@
-import asyncio
-
 import asyncpg
 import pytest
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 from src.modules.identity.domain.repositories.user_repository import UserRepository
-
-# from src.modules.identity.infrastructure.persistence.models import Base as IdentityBase
+from src.modules.identity.infrastructure.persistence.models import Base as IdentityBase
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
-
-# from src.modules.organization.infrastructure.persistence.models import Base as OrgBase
+from src.modules.organization.infrastructure.persistence.models import Base as OrgBase
 
 DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/workgraph_test"
 ADMIN_DB_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
@@ -40,7 +36,9 @@ async def ensure_test_db():
         await conn.close()
 
 
-asyncio.run(ensure_test_db())
+@pytest.fixture(scope="session", autouse=True)
+async def setup_test_db():
+    await ensure_test_db()
 
 
 @pytest.fixture(scope="session")
