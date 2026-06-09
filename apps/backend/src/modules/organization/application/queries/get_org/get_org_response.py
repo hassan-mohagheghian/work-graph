@@ -5,4 +5,3 @@ from dataclasses import dataclass
 class GetOrgResponse:
     id: str
     name: str
-    owner_id: str

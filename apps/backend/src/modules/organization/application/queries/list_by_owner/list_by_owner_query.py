@@ -3,5 +3,5 @@ from uuid import UUID
 
 
 @dataclass
-class ListOrgsByOwnerQuery:
-    owner_id: UUID
+class ListOrgsByUserQuery:
+    user_id: UUID

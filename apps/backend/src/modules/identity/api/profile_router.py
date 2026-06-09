@@ -17,8 +17,7 @@ async def get_user_repo():
 
 @router.get("profile")
 async def get_profile(
-    email: str,
-    repo: SQLAlchemyUserRepository = Depends(get_user_repo),
+    email: str, repo: SQLAlchemyUserRepository = Depends(get_user_repo)
 ):
     handler = FetchUserProfileHandler(user_repo=repo)
     profile = await handler.handle(email=email)

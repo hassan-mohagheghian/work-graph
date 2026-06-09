@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from uuid import UUID
 
 from sqlalchemy import select
@@ -6,7 +7,18 @@ from src.modules.organization.domain.entities.organization import Organization
 from src.modules.organization.domain.repositories.organization_repository import (
     OrganizationRepository,
 )
-from src.modules.organization.infrastructure.persistence.models import OrganizationModel
+from src.modules.organization.domain.value_objects.role import OrgRole
+from src.modules.organization.infrastructure.persistence.models import (
+    OrganizationModel,
+    OrgMembershipModel,
+)
+
+
+@dataclass
+class OrgSummary:
+    id: UUID
+    name: str
+    role: OrgRole
 
 
 class SQLAlchemyOrganizationRepository(OrganizationRepository):
@@ -35,7 +47,6 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
             id=org_model.id,
             name=org_model.name,
             created_at=org_model.created_at,
-            owner_id=org_model.owner_id,
         )
 
     async def get_by_id(self, org_id: UUID) -> Organization:
@@ -52,18 +63,16 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
             id=org_model.id, name=org_model.name, created_at=org_model.created_at
         )
 
-    async def list_by_owner(self, owner_id: UUID) -> list[Organization]:
-        result = await self.session.execute(
-            select(OrganizationModel).where(OrganizationModel.owner_id == owner_id)
-        )
-
-        org_list = result.scalars()
-        return [
-            Organization(
-                id=org.id,
-                name=org.name,
-                created_at=org.created_at,
-                owner_id=org.owner_id,
+    async def list_by_user(self, user_id: UUID) -> list[OrgSummary]:
+        stmt = (
+            select(
+                OrganizationModel.id, OrganizationModel.name, OrgMembershipModel.role
             )
-            for org in org_list
-        ]
+            .join(OrgMembershipModel, OrganizationModel.id == OrgMembershipModel.org_id)
+            .where(OrgMembershipModel.user_id == user_id)
+            .distinct()
+        )
+        result = await self.session.execute(statement=stmt)
+        rows = result.all()
+
+        return [OrgSummary(id=r.id, name=r.name, role=r.role) for r in rows]

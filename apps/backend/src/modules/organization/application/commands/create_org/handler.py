@@ -45,4 +45,4 @@ class CreateOrgHandler:
 
         await self.org_membership_repo.add(membership=membership)
 
-        return CreateOrgResult(id=org.id)
+        return CreateOrgResult(id=org.id, name=org.name, created_at=org.created_at)

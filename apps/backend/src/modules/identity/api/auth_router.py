@@ -1,5 +1,4 @@
-import jwt
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from src.modules.identity.application.commands.register_user import RegisterUserCommand
@@ -25,19 +24,6 @@ from src.shared.config.settings import settings
 # I want it takes email and password in body
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
-
-def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
-    try:
-        payload = jwt.decode(
-            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
-        )
-        user_id: str = payload.get("sub")  # 'sub' is usually user ID in JWT
-        if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        return user_id
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 router = APIRouter(

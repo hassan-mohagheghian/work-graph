@@ -1,14 +1,13 @@
 from dataclasses import dataclass
-from datetime import datetime
 
 
 @dataclass
 class OrgItem:
     id: str
     name: str
-    created_at: datetime
+    role: str
 
 
 @dataclass
-class ListOrgByOwnerResponse:
+class ListOrgByUserResponse:
     organizations: list[OrgItem]

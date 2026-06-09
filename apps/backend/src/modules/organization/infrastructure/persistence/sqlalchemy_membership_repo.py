@@ -64,3 +64,45 @@ class SQLAlchemyOrgMembershipRepo(OrgMembershipRepo):
             )
             for membership in membership_list
         ]
+
+    async def get_by_owner(self, org_id: UUID) -> OrgMembership | None:
+        result = await self.session.execute(
+            select(OrgMembershipModel).where(
+                OrgMembershipModel.org_id == org_id,
+                OrgMembershipModel.role == OrgRole.OWNER,
+            )
+        )
+
+        membership = result.scalar_one_or_none()
+
+        if not membership:
+            return None
+
+        return OrgMembership(
+            id=membership.id,
+            org_id=membership.org_id,
+            user_id=membership.user_id,
+            role=membership.role,
+            created_at=membership.created_at,
+        )
+
+    async def get_by_role(self, org_id: UUID, role: OrgRole) -> OrgMembership | None:
+        result = await self.session.execute(
+            select(OrgMembershipModel).where(
+                OrgMembershipModel.org_id == org_id,
+                OrgMembershipModel.role == role,
+            )
+        )
+
+        membership = result.scalar_one_or_none()
+
+        if not membership:
+            return None
+
+        return OrgMembership(
+            id=membership.id,
+            org_id=membership.org_id,
+            user_id=membership.user_id,
+            role=membership.role,
+            created_at=membership.created_at,
+        )

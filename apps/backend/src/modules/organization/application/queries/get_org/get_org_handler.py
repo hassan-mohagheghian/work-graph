@@ -21,4 +21,4 @@ class GetOrgHandler:
             raise OrganizationNotFoundError(
                 f"Organization with id {query.org_id} not found"
             )
-        return GetOrgResponse(id=str(org.id), name=org.name, owner_id=org.owner_id)
+        return GetOrgResponse(id=str(org.id), name=org.name)

@@ -22,5 +22,5 @@ class OrganizationRepository(ABC):
         pass
 
     @abstractmethod
-    def list_by_owner(self, owner_id: UUID) -> list[Organization]:
+    async def list_by_user(self, user_id: UUID) -> list[Organization]:
         pass

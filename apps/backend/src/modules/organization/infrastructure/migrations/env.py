@@ -3,7 +3,11 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from src.modules.organization.infrastructure.persistence.base import Base
-from src.modules.organization.infrastructure.persistence.models import OrganizationModel, OrgMembershipModel  # noqa: F401
+
+from src.modules.organization.infrastructure.persistence.models import (  # noqa: F401
+    OrganizationModel,
+    OrgMembershipModel,
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,6 +29,10 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table":
+        return object.schema == "org"
+    return True
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -44,8 +52,11 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        version_table="alembic_version_organization",
         include_schemas=True,
+        version_table="alembic_version_organization",
+        version_table_schema="org",
+        include_object=include_object,
+
     )
 
     with context.begin_transaction():
@@ -69,8 +80,11 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            version_table="alembic_version_organization",
             include_schemas=True,
+            version_table="alembic_version_organization",
+            version_table_schema="org",
+            include_object=include_object,
+
         )
 
         with context.begin_transaction():
