@@ -11,6 +11,10 @@ class OrgMembershipRepo(ABC):
         pass
 
     @abstractmethod
+    async def delete(self, org_id: UUID, user_id: UUID) -> None:
+        pass
+
+    @abstractmethod
     async def get_by_user_and_org(
         self, user_id: UUID, org_id: UUID
     ) -> OrgMembership | None:
@@ -26,4 +30,8 @@ class OrgMembershipRepo(ABC):
 
     @abstractmethod
     async def get_by_role(self, org_id: UUID, role: OrgRole) -> OrgMembership | None:
+        pass
+
+    @abstractmethod
+    async def update_role(self, org_id: UUID, user_id: UUID, role: OrgRole) -> None:
         pass

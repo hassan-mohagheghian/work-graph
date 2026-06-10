@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.organization.domain.entities.membership import OrgMembership
 from src.modules.organization.domain.repositories.org_membership_repo import (
@@ -26,6 +26,13 @@ class SQLAlchemyOrgMembershipRepo(OrgMembershipRepo):
         )
 
         self.session.add(model)
+        await self.session.commit()
+
+    async def delete(self, org_id: UUID, user_id: UUID):
+        stmt = delete(OrgMembershipModel).where(
+            OrgMembershipModel.org_id == org_id, OrgMembershipModel.user_id == user_id
+        )
+        await self.session.execute(stmt)
         await self.session.commit()
 
     async def get_by_user_and_org(self, user_id: UUID, org_id: UUID) -> OrgMembership:
@@ -106,3 +113,15 @@ class SQLAlchemyOrgMembershipRepo(OrgMembershipRepo):
             role=membership.role,
             created_at=membership.created_at,
         )
+
+    async def update_role(self, org_id: str, user_id: str, role):
+        stmt = (
+            update(OrgMembershipModel)
+            .where(
+                OrgMembershipModel.org_id == org_id,
+                OrgMembershipModel.user_id == user_id,
+            )
+            .values(role=role)
+        )
+        await self.session.execute(stmt)
+        await self.session.commit()

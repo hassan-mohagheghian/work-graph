@@ -1,0 +1,57 @@
+from datetime import datetime, timezone
+from uuid import uuid4
+
+import pytest
+from src.modules.organization.application.commands.delete_org_member.command import (
+    DeleteOrgMemberCommand,
+)
+from src.modules.organization.application.commands.delete_org_member.handler import (
+    DeleteOrgMemberHandler,
+)
+from src.modules.organization.domain.entities.membership import OrgMembership
+from src.modules.organization.domain.entities.organization import Organization
+from src.modules.organization.domain.value_objects.role import OrgRole
+
+
+@pytest.mark.asyncio
+async def test_remove_member_success(org_repo, org_membership_repo):
+
+    # --- setup org ---
+    org = Organization(
+        name="org-1",
+        created_at=datetime.now(timezone.utc),
+    )
+    await org_repo.add(organization=org)
+
+    # --- owner (actor) ---
+    owner_id = uuid4()
+    owner = OrgMembership(
+        org_id=org.id,
+        user_id=owner_id,
+        role=OrgRole.OWNER,
+        created_at=datetime.now(timezone.utc),
+    )
+    await org_membership_repo.add(owner)
+
+    # --- target member ---
+    member_id = uuid4()
+    member = OrgMembership(
+        org_id=org.id,
+        user_id=member_id,
+        role=OrgRole.MEMBER,
+        created_at=datetime.now(timezone.utc),
+    )
+    await org_membership_repo.add(member)
+
+    handler = DeleteOrgMemberHandler(org_membership_repo=org_membership_repo)
+    cmd = DeleteOrgMemberCommand(org_id=org.id, target_user_id=member_id)
+
+    result = await handler.handle(cmd=cmd, actor_membership=owner)
+
+    assert result
+
+    # verify DB state
+    remaining = await org_membership_repo.get_by_user_and_org(
+        user_id=member_id, org_id=org.id
+    )
+    assert remaining is None

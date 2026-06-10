@@ -11,7 +11,12 @@ class MembershipPolicy:
             return False
         return self.membership.role == OrgRole.OWNER
 
-    def can_remove_member(self) -> bool:
+    def can_delete_members(self) -> bool:
+        if not self.membership:
+            return False
+        return self.membership.role == OrgRole.OWNER
+
+    def can_change_role(self) -> bool:
         if not self.membership:
             return False
         return self.membership.role == OrgRole.OWNER

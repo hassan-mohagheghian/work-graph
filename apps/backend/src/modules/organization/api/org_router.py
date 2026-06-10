@@ -10,11 +10,23 @@ from src.modules.organization.application.commands.add_org_member.command import
 from src.modules.organization.application.commands.add_org_member.handler import (
     AddOrgMemberHandler,
 )
+from src.modules.organization.application.commands.change_role.command import (
+    ChangeOrgMemberRoleCommand,
+)
+from src.modules.organization.application.commands.change_role.handler import (
+    ChangeOrgMemberRoleHandler,
+)
 from src.modules.organization.application.commands.create_org.command import (
     CreateOrgCommand,
 )
 from src.modules.organization.application.commands.create_org.handler import (
     CreateOrgHandler,
+)
+from src.modules.organization.application.commands.delete_org_member.command import (
+    DeleteOrgMemberCommand,
+)
+from src.modules.organization.application.commands.delete_org_member.handler import (
+    DeleteOrgMemberHandler,
 )
 from src.modules.organization.application.queries.get_org.get_org_handler import (
     GetOrgHandler,
@@ -146,3 +158,36 @@ async def list_members(
     query = OrgMembersQuery(org_id=org_id)
 
     return await handler.handle(query=query)
+
+
+@router.delete("/{org_id}/members/{user_id}")
+async def delete_member(
+    org_id: str,
+    user_id: str,
+    actor_membership=Depends(require_org_role(OrgRole.OWNER)),
+    repo: OrgMembershipRepo = Depends(get_org_membership_repo),
+):
+    handler = DeleteOrgMemberHandler(repo)
+    cmd = DeleteOrgMemberCommand(org_id=org_id, target_user_id=user_id)
+
+    return await handler.handle(cmd=cmd, actor_membership=actor_membership)
+
+
+class ChangeRoleRequest(BaseModel):
+    role: OrgRole
+
+
+@router.patch("/{org_id}/members/{user_id}")
+async def change_role(
+    org_id: str,
+    user_id: str,
+    body: ChangeRoleRequest,
+    actor_membership=Depends(require_org_role(OrgRole.OWNER)),
+    repo: SQLAlchemyOrgMembershipRepo = Depends(get_org_membership_repo),
+):
+    handler = ChangeOrgMemberRoleHandler(repo)
+    cmd = ChangeOrgMemberRoleCommand(
+        org_id=org_id, target_user_id=user_id, new_role=body.role
+    )
+
+    return await handler.handle(cmd=cmd, actor_membership=actor_membership)
