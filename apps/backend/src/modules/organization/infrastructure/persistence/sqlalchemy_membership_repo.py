@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.organization.domain.entities.membership import OrgMembership
 from src.modules.organization.domain.repositories.org_membership_repo import (
@@ -125,3 +125,12 @@ class SQLAlchemyOrgMembershipRepo(OrgMembershipRepo):
         )
         await self.session.execute(stmt)
         await self.session.commit()
+
+    async def count_owners(self, org_id: UUID) -> int:
+        stmt = select(func.count()).where(
+            OrgMembershipModel.org_id == org_id,
+            OrgMembershipModel.role == OrgRole.OWNER,
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalar_one()

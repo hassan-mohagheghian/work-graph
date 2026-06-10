@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-
 from src.bootstrap.routers import register_routers
 from src.exception_handler import register_exception_handlers
 

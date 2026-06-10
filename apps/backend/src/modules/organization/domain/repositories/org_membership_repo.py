@@ -35,3 +35,7 @@ class OrgMembershipRepo(ABC):
     @abstractmethod
     async def update_role(self, org_id: UUID, user_id: UUID, role: OrgRole) -> None:
         pass
+
+    @abstractmethod
+    async def count_owners(self, org_id: UUID) -> int:
+        pass
