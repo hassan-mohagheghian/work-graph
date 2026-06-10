@@ -28,6 +28,12 @@ from src.modules.organization.application.queries.list_by_owner.list_by_owner_ha
 from src.modules.organization.application.queries.list_by_owner.list_by_owner_query import (
     ListOrgsByUserQuery,
 )
+from src.modules.organization.application.queries.list_membership_by_org.handler import (
+    ListOrgMembersHandler,
+)
+from src.modules.organization.application.queries.list_membership_by_org.query import (
+    OrgMembersQuery,
+)
 from src.modules.organization.domain.entities.membership import OrgMembership
 from src.modules.organization.domain.exceptions import OrganizationAlreadyExistsError
 from src.modules.organization.domain.repositories.org_membership_repo import (
@@ -129,3 +135,14 @@ async def add_member(
     )
 
     return await handler.handle(cmd=cmd, current_user_membership=current_membership)
+
+
+@router.get("/{org_id}/members")
+async def list_members(
+    org_id: str,
+    membership_repo: OrgMembershipRepo = Depends(get_org_membership_repo),
+):
+    handler = ListOrgMembersHandler(membership_repo=membership_repo)
+    query = OrgMembersQuery(org_id=org_id)
+
+    return await handler.handle(query=query)
