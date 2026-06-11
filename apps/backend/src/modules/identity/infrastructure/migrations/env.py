@@ -3,7 +3,6 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from src.modules.identity.infrastructure.persistence.base import Base
-
 from src.modules.identity.infrastructure.persistence.models import (
     UserModel,  # noqa: F401
 )
