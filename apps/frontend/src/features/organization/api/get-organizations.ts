@@ -1,4 +1,4 @@
-import { api } from "@/lib/api/client";
+import api from "@/lib/api/client";
 
 export type Organization = {
   id: string;
@@ -6,13 +6,7 @@ export type Organization = {
 };
 
 export async function getOrganizations(): Promise<Organization[]> {
-  const token = localStorage.getItem("access_token");
-
-  const res = await api.get("/org", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await api.get("/org");
 
   return res.data;
 }
