@@ -1,67 +1,52 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
-import { ROUTES } from "@/shared/routes";
 import {
   getOrganizations,
   Organization,
 } from "@/features/organization/api/get-organizations";
+import { CreateOrganization } from "@/features/organization/components/create-organization";
 
 export default function OrganizationsPage() {
-  const router = useRouter();
-
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      router.replace(ROUTES.LOGIN);
-      return;
+  async function load() {
+    setLoading(true);
+    try {
+      const data = await getOrganizations();
+      setOrgs(data);
+    } finally {
+      setLoading(false);
     }
-
-    async function load() {
-      try {
-        const data = await getOrganizations();
-        setOrgs(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
-  }, [router]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading organizations...
-      </div>
-    );
   }
 
-  return (
-    <main className="min-h-screen p-6 bg-gray-50">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-6">Organizations</h1>
+  useEffect(() => {
+    load();
+  }, []);
 
-        {orgs.length === 0 ? (
-          <div className="text-gray-500">No organizations found</div>
-        ) : (
-          <div className="space-y-3">
-            {orgs.map((org) => (
-              <div key={org.id} className="p-4 border rounded-lg bg-white">
-                {org.name}
-              </div>
-            ))}
-          </div>
-        )}
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl font-bold">Organizations</h1>
+
+        <CreateOrganization onCreated={load} />
       </div>
-    </main>
+
+      {loading ? (
+        <p className="mt-4">Loading...</p>
+      ) : orgs.length === 0 ? (
+        <p className="mt-4">No organizations yet</p>
+      ) : (
+        <div className="mt-4 space-y-2">
+          {orgs.map((org) => (
+            <div key={org.id} className="border p-3 rounded">
+              {org.name}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

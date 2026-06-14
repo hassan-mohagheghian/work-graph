@@ -1,20 +1,30 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearToken, getToken } from "./token";
-import { useMemo } from "react";
 
 export function useAuth() {
   const router = useRouter();
-  const token = getToken();
-  const isAuthenticated = useMemo(() => !!token, [token]);
+
+  const [token, setToken] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setToken(getToken());
+    setMounted(true);
+  }, []);
 
   function logout() {
     clearToken();
+    setToken(null);
     router.push("/");
   }
 
   return {
     token,
-    isAuthenticated,
+    isAuthenticated: !!token,
     logout,
+    mounted,
   };
 }

@@ -1,4 +1,4 @@
-import api from "@/lib/api/client";
+import { api } from "@/shared/lib/api";
 import { LoginRequest, LoginResponse } from "../types/auth";
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {

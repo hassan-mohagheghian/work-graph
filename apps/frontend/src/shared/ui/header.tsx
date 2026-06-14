@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AuthButton } from "./auth_button";
+import { AuthButton } from "./auth-button";
 
 export function Header() {
   return (

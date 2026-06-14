@@ -1,4 +1,4 @@
-import api from "@/lib/api/client";
+import { api } from "@/shared/lib/api";
 
 export type Organization = {
   id: string;
@@ -6,7 +6,7 @@ export type Organization = {
 };
 
 export async function getOrganizations(): Promise<Organization[]> {
-  const res = await api.get("/org");
+  const res = await api.get("/organizations");
 
   return res.data;
 }

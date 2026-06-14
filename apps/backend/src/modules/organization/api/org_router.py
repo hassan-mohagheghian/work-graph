@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from src.modules.identity.api.auth_router import get_user_repo
 from src.modules.identity.domain.repositories.user_repository import UserRepository
@@ -64,7 +64,7 @@ from src.shared.infrastructure.dependencies.auth import (
     require_org_role,
 )
 
-router = APIRouter(prefix="/org", tags=["Organizations"])
+router = APIRouter(prefix="/organizations", tags=["Organizations"])
 
 
 async def get_org_repo():
@@ -77,9 +77,13 @@ async def get_org_membership_repo():
         yield SQLAlchemyOrgMembershipRepo(session=session)
 
 
+class CreateOrganizationRequest(BaseModel):
+    name: str
+
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_org(
-    name: str,
+    body: CreateOrganizationRequest,
     org_repo=Depends(get_org_repo),
     org_membership_repo=Depends(get_org_membership_repo),
     user_id: str = Depends(get_current_user_id),
@@ -88,14 +92,14 @@ async def create_org(
         org_repo=org_repo, org_membership_repo=org_membership_repo
     )
     try:
-        org = await handler.handle(CreateOrgCommand(name=name, owner_id=user_id))
+        org = await handler.handle(CreateOrgCommand(name=body.name, owner_id=user_id))
         return {
             "id": str(org.id),
             "name": org.name,
             "created_at": org.created_at.isoformat(),
         }
     except OrganizationAlreadyExistsError as e:
-        return {"detail": str(e)}
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.get("/{org_id}")

@@ -5,7 +5,9 @@ import { Button } from "./button";
 import { useAuth } from "../auth/use-auth";
 
 export function AuthButton() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, mounted } = useAuth();
+
+  if (!mounted) return null;
 
   if (!isAuthenticated) {
     return (
