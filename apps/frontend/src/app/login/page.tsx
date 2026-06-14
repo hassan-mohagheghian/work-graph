@@ -1,7 +1,7 @@
 "use client";
 
 import { LoginForm } from "@/features/auth/components/login-form";
-import { useRedirectIfAuth } from "@/shared/auth/use-redirect-if_auth";
+import { useRedirectIfAuth } from "@/features/auth/hooks/use-redirect-if-auth";
 
 export default function LoginPage() {
   useRedirectIfAuth();

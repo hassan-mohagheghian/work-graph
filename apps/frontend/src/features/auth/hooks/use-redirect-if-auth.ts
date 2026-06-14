@@ -2,16 +2,24 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+
 import { ROUTES } from "@/shared/routes";
+import { getMe } from "../api/get-me";
 
 export function useRedirectIfAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    async function checkAuth() {
+      try {
+        await getMe();
 
-    if (token) {
-      router.replace(ROUTES.ORGANIZATIONS);
+        router.replace(ROUTES.ORGANIZATIONS);
+      } catch {
+        // user is not authenticated
+      }
     }
+
+    checkAuth();
   }, [router]);
 }

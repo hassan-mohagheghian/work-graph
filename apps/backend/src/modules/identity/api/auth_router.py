@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from src.modules.identity.application.commands.register_user import RegisterUserCommand
@@ -26,10 +26,7 @@ from src.shared.config.settings import settings
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-router = APIRouter(
-    prefix="/auth",
-    tags=["Authentication"],
-)
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 class RegisterUserRequest(BaseModel):
@@ -73,6 +70,7 @@ async def register_user(
 
 @router.post("/login")
 async def login_user(
+    response: Response,
     req: OAuth2PasswordRequestForm = Depends(),
     repo: SQLAlchemyUserRepository = Depends(get_user_repo),
 ):
@@ -84,4 +82,20 @@ async def login_user(
         ),
     )
     query = LoginUserQuery(email=req.username, password=req.password)
-    return await handler.handle(query=query)
+
+    result = await handler.handle(query=query)
+    response.set_cookie(
+        key="access_token",
+        value=result.access_token,
+        httponly=True,
+        secure=False,  # True in production
+        samesite="lax",
+        max_age=60 * 60 * 24,
+    )
+    return result
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie("access_token")
+    return {"message": "logged out"}

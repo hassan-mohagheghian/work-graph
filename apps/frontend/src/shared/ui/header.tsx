@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AuthButton } from "./auth-button";
+import { AuthButton } from "../../features/auth/components/auth-button";
 
 import { useEffect, useState } from "react";
 import { useActiveOrg } from "@/features/organization/hooks/use-active-org";

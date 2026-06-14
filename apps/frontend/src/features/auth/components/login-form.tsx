@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
+import { ROUTES } from "@/shared/routes";
 
 export function LoginForm() {
   const router = useRouter();
@@ -38,15 +39,8 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: LoginFormData) {
-    try {
-      const result = await mutateAsync(values);
-
-      localStorage.setItem("access_token", result.access_token);
-
-      router.push("/organizations");
-    } catch (error) {
-      console.error(error);
-    }
+    await mutateAsync(values);
+    router.push(ROUTES.ORGANIZATIONS);
   }
 
   return (

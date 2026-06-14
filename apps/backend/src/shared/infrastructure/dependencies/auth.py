@@ -1,5 +1,5 @@
 import jwt
-from fastapi import Depends, status
+from fastapi import Cookie, Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from src.modules.organization.domain.entities.membership import OrgMembership
@@ -21,10 +21,12 @@ async def get_org_membership_repo():
         yield SQLAlchemyOrgMembershipRepo(session=session)
 
 
-def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
+def get_current_user_id(access_token: str | None = Cookie(None)) -> str:
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         payload = jwt.decode(
-            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+            access_token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
         )
         user_id: str = payload.get("sub")  # 'sub' is usually user ID in JWT
         if user_id is None:
@@ -35,7 +37,6 @@ def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
 
 
 def require_org_role(required_role: OrgRole) -> OrgMembership:
-
     async def dependency(
         org_id: str,
         current_user_id: str = Depends(get_current_user_id),

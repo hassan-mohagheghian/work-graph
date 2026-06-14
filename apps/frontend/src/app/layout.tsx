@@ -1,6 +1,6 @@
 "use client";
 
-import { Providers } from "./providers";
+import { QueryProvider } from "./providers";
 import "./globals.css";
 import { usePathname } from "next/navigation";
 import { ROUTES } from "@/shared/routes";
@@ -19,7 +19,7 @@ export default function RootLayout({
       <body>
         {!isAuthPage && <Header />}
 
-        <Providers>{children}</Providers>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
