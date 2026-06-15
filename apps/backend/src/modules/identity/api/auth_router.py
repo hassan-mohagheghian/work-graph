@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from src.modules.identity.application.commands.register_user import RegisterUserCommand
-from src.modules.identity.application.handlers.login_user_handler import (
-    LoginUserHandler,
-)
-from src.modules.identity.application.handlers.register_user_handler import (
+from src.modules.identity.application.commands.register_user_handler import (
     RegisterUerHandler,
 )
-from src.modules.identity.application.queries.login_user_query import LoginUserQuery
+from src.modules.identity.application.queries.login_user.handler import (
+    LoginUserHandler,
+)
+from src.modules.identity.application.queries.login_user.query import LoginUserQuery
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )

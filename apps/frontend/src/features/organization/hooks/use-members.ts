@@ -41,10 +41,10 @@ export function useMembers(orgId: string | null) {
     await load();
   }
 
-  async function invite(userId: string, role: Role) {
+  async function invite(email: string, role: Role) {
     if (!orgId) return;
 
-    await addMember(orgId, userId, role);
+    await addMember(orgId, email, role);
     await load();
   }
 

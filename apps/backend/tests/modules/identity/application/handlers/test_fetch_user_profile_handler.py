@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest
-from src.modules.identity.application.handlers.fetch_user_profile_handler import (
+from src.modules.identity.application.queries.get_user_profile.handler import (
     FetchUserProfileHandler,
 )
 from src.modules.identity.domain.entities.user import User

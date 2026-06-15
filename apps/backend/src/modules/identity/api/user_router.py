@@ -1,11 +1,11 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from src.modules.identity.application.handlers.fetch_user_profile_handler import (
-    FetchUserProfileHandler,
-)
 from src.modules.identity.application.queries.get_me.handler import GetMeQueryHandler
 from src.modules.identity.application.queries.get_me.query import GetMeQuery
+from src.modules.identity.application.queries.get_user_profile.handler import (
+    FetchUserProfileHandler,
+)
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )

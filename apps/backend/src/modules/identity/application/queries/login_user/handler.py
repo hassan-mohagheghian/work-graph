@@ -1,5 +1,5 @@
-from src.modules.identity.application.dtos.login_result_dto import LoginResultDTO
-from src.modules.identity.application.queries.login_user_query import LoginUserQuery
+from src.modules.identity.application.queries.login_user.query import LoginUserQuery
+from src.modules.identity.application.queries.login_user.result import LoginResultDTO
 from src.modules.identity.domain.exceptions import InvalidCredentialsError
 from src.modules.identity.domain.ports import PasswordHasher
 from src.modules.identity.domain.ports.token_provider import TokenProvider

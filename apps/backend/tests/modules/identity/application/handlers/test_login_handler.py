@@ -3,11 +3,11 @@ from datetime import datetime, timezone
 from unittest.mock import ANY
 
 import pytest
-from src.modules.identity.application.dtos.login_result_dto import LoginResultDTO
-from src.modules.identity.application.handlers.login_user_handler import (
+from src.modules.identity.application.queries.login_user.handler import (
     LoginUserHandler,
 )
-from src.modules.identity.application.queries.login_user_query import LoginUserQuery
+from src.modules.identity.application.queries.login_user.query import LoginUserQuery
+from src.modules.identity.application.queries.login_user.result import LoginResultDTO
 from src.modules.identity.domain.entities.user import User
 from src.modules.identity.infrastructure.security.argon2_password_hasher import (
     Argon2PasswordHasher,

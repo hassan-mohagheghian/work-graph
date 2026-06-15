@@ -1,12 +1,8 @@
 import pytest
-from datetime import datetime, timezone
-import uuid
-
 from src.modules.identity.application.commands.register_user import RegisterUserCommand
-from src.modules.identity.application.handlers.register_user_handler import (
+from src.modules.identity.application.commands.register_user_handler import (
     RegisterUerHandler,
 )
-from src.modules.identity.domain.entities.user import User
 from src.modules.identity.infrastructure.security.argon2_password_hasher import (
     Argon2PasswordHasher,
 )

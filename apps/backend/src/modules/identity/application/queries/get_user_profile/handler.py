@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.modules.identity.application.dtos import UserProfile
+from src.modules.identity.application.queries.get_user_profile.result import UserProfile
 from src.modules.identity.domain.repositories import UserRepository
 
 
