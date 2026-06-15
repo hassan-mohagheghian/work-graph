@@ -2,9 +2,9 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from src.modules.identity.infrastructure.persistence.base import Base
-from src.modules.identity.infrastructure.persistence.models import (
-    UserModel,  # noqa: F401
+from src.modules.project.infrastructure.persistence.base import Base
+from src.modules.project.infrastructure.persistence.models import (
+    ProjectModel,  # noqa: F401
 )
 
 # this is the Alembic Config object, which provides
@@ -29,8 +29,9 @@ target_metadata = Base.metadata
 
 def include_object(object, name, type_, reflected, compare_to):
     if type_ == "table":
-        return object.schema == "identity"
+        return object.schema == "project"
     return True
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -51,10 +52,9 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         include_schemas=True,
-        version_table="alembic_version_identity",
-        version_table_schema="identity",
+        version_table="alembic_version_project",
+        version_table_schema="project",
         include_object=include_object,
-
     )
 
     with context.begin_transaction():
@@ -79,8 +79,8 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
-            version_table="alembic_version_identity",
-            version_table_schema="identity",
+            version_table="alembic_version_project",
+            version_table_schema="project",
             include_object=include_object,
         )
 

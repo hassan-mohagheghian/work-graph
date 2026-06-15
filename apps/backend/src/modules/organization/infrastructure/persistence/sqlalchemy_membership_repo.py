@@ -37,6 +37,19 @@ class SQLAlchemyOrgMembershipRepo(OrgMembershipRepo):
         await self.session.execute(stmt)
         await self.session.commit()
 
+    async def exits(self, org_id, user_id):
+        result = await self.session.execute(
+            select(OrgMembershipModel).where(
+                OrgMembershipModel.user_id == user_id,
+                OrgMembershipModel.org_id == org_id,
+            )
+        )
+        membership = result.scalar_one_or_none()
+
+        if not membership:
+            return False
+        return True
+
     async def get_by_user_and_org(self, user_id: UUID, org_id: UUID) -> OrgMembership:
         result = await self.session.execute(
             select(OrgMembershipModel).where(

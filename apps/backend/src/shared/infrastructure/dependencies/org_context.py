@@ -1,0 +1,24 @@
+from uuid import UUID
+
+from fastapi import Depends, Header, HTTPException, status
+from src.modules.organization.domain.repositories.org_membership_repo import (
+    OrgMembershipRepo,
+)
+from src.shared.infrastructure.dependencies.auth import (
+    get_current_user_id,
+    get_org_membership_repo,
+)
+
+
+async def get_current_org_id(
+    x_org_id: str = Header(...),
+    user_id: str = Depends(get_current_user_id),
+    membership_repo: OrgMembershipRepo = Depends(get_org_membership_repo),
+) -> UUID:
+    org_id = UUID(x_org_id)
+
+    is_member = await membership_repo.exits(org_id=org_id, user_id=user_id)
+    if not is_member:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not Allowed")
+
+    return org_id

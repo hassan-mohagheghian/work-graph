@@ -24,6 +24,10 @@ class OrgMembershipRepo(ABC):
         pass
 
     @abstractmethod
+    async def exits(self, org_id: UUID, user_id: UUID) -> bool:
+        pass
+
+    @abstractmethod
     async def get_by_user_and_org(
         self, user_id: UUID, org_id: UUID
     ) -> OrgMembership | None:
