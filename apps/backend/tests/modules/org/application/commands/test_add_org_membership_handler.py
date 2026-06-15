@@ -67,7 +67,7 @@ async def test_add_member_integration(async_session):
 
     cmd = AddOrgMemberCommand(
         org_id=org.id,
-        user_id=user.id,
+        email=user.email,
         role=OrgRole.MEMBER,
     )
 

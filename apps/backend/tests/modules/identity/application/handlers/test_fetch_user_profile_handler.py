@@ -1,9 +1,9 @@
 # apps/backend/tests/modules/identity/application/test_fetch_user_profile_handler.py
 
-import pytest
-from datetime import datetime, timezone
 import uuid
+from datetime import datetime, timezone
 
+import pytest
 from src.modules.identity.application.handlers.fetch_user_profile_handler import (
     FetchUserProfileHandler,
 )
@@ -27,7 +27,7 @@ async def test_fetch_user_profile(user_repo):
 
     # --- Act ---
     handler = FetchUserProfileHandler(user_repo=user_repo)
-    result = await handler.handle(email=user.email)
+    result = await handler.handle(id=user.id)
 
     # --- Assert ---
     assert result.id == user.id

@@ -1,8 +1,17 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from uuid import UUID
 
 from src.modules.organization.domain.entities.membership import OrgMembership
 from src.modules.organization.domain.value_objects.role import OrgRole
+
+
+@dataclass
+class OrgMember:
+    user_id: UUID
+    name: str
+    email: str
+    role: str
 
 
 class OrgMembershipRepo(ABC):
@@ -22,6 +31,10 @@ class OrgMembershipRepo(ABC):
 
     @abstractmethod
     async def list_by_org(self, org_id: UUID) -> list[OrgMembership]:
+        pass
+
+    @abstractmethod
+    async def list_members_by_org(self, org_id: UUID) -> list[OrgMember]:
         pass
 
     @abstractmethod

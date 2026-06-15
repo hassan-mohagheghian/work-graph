@@ -15,11 +15,18 @@ class ListOrgMembersHandler:
         self.membership_repo = membership_repo
 
     async def handle(self, query: OrgMembersQuery) -> OrgMembersResponse:
-        memberships = await self.membership_repo.list_by_org(org_id=query.org_id)
+        memberships = await self.membership_repo.list_members_by_org(
+            org_id=query.org_id
+        )
 
         return OrgMembersResponse(
             members=[
-                OrgMemberItem(user_id=item.user_id, role=item.role)
+                OrgMemberItem(
+                    user_id=item.user_id,
+                    role=item.role,
+                    name=item.name,
+                    email=item.email,
+                )
                 for item in memberships
             ]
         )

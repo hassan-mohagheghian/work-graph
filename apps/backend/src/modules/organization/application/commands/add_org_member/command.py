@@ -6,6 +6,6 @@ from src.modules.organization.domain.value_objects.role import OrgRole
 
 @dataclass
 class AddOrgMemberCommand:
-    user_id: UUID
+    email: str
     org_id: UUID
     role: OrgRole

@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from src.modules.identity.domain.repositories.user_repository import UserRepository
 from src.modules.organization.application.commands.add_org_member.command import (
     AddOrgMemberCommand,
@@ -36,19 +37,23 @@ class AddOrgMemberHandler:
                 detail="Not allowed to add members",
             )
 
-        user = await self.user_repo.get_by_id(id=cmd.user_id)
+        user = await self.user_repo.get_by_email(email=cmd.email)
 
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         membership = OrgMembership(
             org_id=cmd.org_id,
-            user_id=cmd.user_id,
+            user_id=user.id,
             role=OrgRole(cmd.role),
             created_at=datetime.now(timezone.utc),
         )
 
-        await self.org_membership_repo.add(membership=membership)
+        try:
+            await self.org_membership_repo.add(membership=membership)
+        except IntegrityError:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT)
+
         return AddOrgMembershipResult(
             id=membership.id,
             user_id=membership.user_id,

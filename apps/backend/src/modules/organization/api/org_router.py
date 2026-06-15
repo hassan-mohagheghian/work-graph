@@ -127,7 +127,7 @@ async def secure_org_data(
 
 
 class AddMemberRequest(BaseModel):
-    user_id: str
+    email: str
     role: str
 
 
@@ -146,7 +146,7 @@ async def add_member(
 
     cmd = AddOrgMemberCommand(
         org_id=org_id,
-        user_id=body.user_id,
+        email=body.email,
         role=body.role,
     )
 

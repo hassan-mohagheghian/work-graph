@@ -2,8 +2,10 @@ from uuid import UUID
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.modules.identity.infrastructure.persistence.models import UserModel
 from src.modules.organization.domain.entities.membership import OrgMembership
 from src.modules.organization.domain.repositories.org_membership_repo import (
+    OrgMember,
     OrgMembershipRepo,
 )
 from src.modules.organization.domain.value_objects.role import OrgRole
@@ -70,6 +72,26 @@ class SQLAlchemyOrgMembershipRepo(OrgMembershipRepo):
                 created_at=membership.created_at,
             )
             for membership in membership_list
+        ]
+
+    async def list_members_by_org(self, org_id: UUID) -> list[OrgMember]:
+        result = await self.session.execute(
+            select(
+                UserModel.id,
+                UserModel.display_name,
+                UserModel.email,
+                OrgMembershipModel.role,
+            )
+            .join(OrgMembershipModel, UserModel.id == OrgMembershipModel.user_id)
+            .where(OrgMembershipModel.org_id == org_id)
+        )
+        rows = result.all()
+
+        return [
+            OrgMember(
+                user_id=row.id, name=row.display_name, email=row.email, role=row.role
+            )
+            for row in rows
         ]
 
     async def get_by_owner(self, org_id: UUID) -> OrgMembership | None:

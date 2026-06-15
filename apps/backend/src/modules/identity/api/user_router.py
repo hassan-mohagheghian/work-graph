@@ -1,12 +1,15 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from src.modules.identity.application.handlers.fetch_user_profile_handler import (
     FetchUserProfileHandler,
 )
+from src.modules.identity.application.queries.get_me.handler import GetMeQueryHandler
+from src.modules.identity.application.queries.get_me.query import GetMeQuery
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
+from src.modules.organization.api.org_router import get_org_repo
 from src.shared.config.database import AsyncSessionLocal
 from src.shared.infrastructure.dependencies.auth import get_current_user_id
 
@@ -31,7 +34,13 @@ async def get_profile(
 
 
 @router.get("/me")
-async def me(
+async def get_me(
     user_id: str = Depends(get_current_user_id),
+    repo: SQLAlchemyUserRepository = Depends(get_org_repo),
 ):
-    return {"id": user_id}
+    handler = GetMeQueryHandler(org_repo=repo)
+    query = GetMeQuery(user_id=user_id)
+    response = await handler.handle(query=query)
+    if not response:
+        HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+    return response
