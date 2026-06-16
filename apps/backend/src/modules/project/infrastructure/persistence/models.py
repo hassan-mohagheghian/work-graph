@@ -2,10 +2,10 @@ from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from src.modules.project.infrastructure.persistence.base import Base
-from src.shared.infrastructure.persistence.base import CreateAtMixin, UUIDMixin
+from src.shared.infrastructure.persistence.base import CreateAtMixin, IDMixin
 
 
-class ProjectModel(UUIDMixin, CreateAtMixin, Base):
+class ProjectModel(IDMixin, CreateAtMixin, Base):
     __table_args__ = {"schema": "project"}
     __tablename__ = "projects"
 

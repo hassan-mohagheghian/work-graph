@@ -1,10 +1,10 @@
 from sqlalchemy import Boolean, Column, String
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from src.modules.identity.infrastructure.persistence.base import Base
-from src.shared.infrastructure.persistence.base import UUIDMixin
+from src.shared.infrastructure.persistence.base import IDMixin
 
 
-class UserModel(UUIDMixin, Base):
+class UserModel(IDMixin, Base):
     __table_args__ = {"schema": "identity"}
     __tablename__ = "users"
 

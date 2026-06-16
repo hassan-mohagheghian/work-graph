@@ -1,17 +1,17 @@
 from sqlalchemy import Column, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from src.modules.organization.infrastructure.persistence.base import Base
-from src.shared.infrastructure.persistence.base import CreateAtMixin, UUIDMixin
+from src.shared.infrastructure.persistence.base import CreateAtMixin, IDMixin
 
 
-class OrganizationModel(UUIDMixin, CreateAtMixin, Base):
+class OrganizationModel(IDMixin, CreateAtMixin, Base):
     __table_args__ = {"schema": "org"}
     __tablename__ = "organizations"
 
     name = Column(String(200), unique=True, nullable=False)
 
 
-class OrgMembershipModel(UUIDMixin, CreateAtMixin, Base):
+class OrgMembershipModel(IDMixin, CreateAtMixin, Base):
     __table_args__ = (
         UniqueConstraint(
             "org_id",

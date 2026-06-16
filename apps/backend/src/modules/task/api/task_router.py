@@ -1,0 +1,55 @@
+from uuid import UUID
+
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from src.modules.task.application.commands.create_task.command import CreateTaskCommand
+from src.modules.task.application.commands.create_task.handler import CreateTaskHandler
+from src.modules.task.application.queries.list_tasks.handler import ListTasksHandler
+from src.modules.task.application.queries.list_tasks.query import ListTasksQuery
+from src.modules.task.infrastructure.persistence.sqlalchemy_task_repo import (
+    SqlAlchemyTaskRepo,
+)
+from src.shared.config.database import AsyncSessionLocal
+from src.shared.infrastructure.dependencies.org_context import get_current_org_id
+
+router = APIRouter(prefix="/tasks", tags=["tasks"])
+
+
+async def get_task_repo():
+    async with AsyncSessionLocal() as session:
+        yield SqlAlchemyTaskRepo(session=session)
+
+
+class CreateTaskRequest(BaseModel):
+    project_id: UUID
+    title: str
+    description: str | None = None
+
+
+@router.post("")
+async def create_task(
+    body: CreateTaskRequest,
+    task_repo=Depends(get_task_repo),
+    org_id=Depends(get_current_org_id),
+):
+    handler = CreateTaskHandler(task_repo)
+
+    return await handler.handle(
+        CreateTaskCommand(
+            org_id=org_id,
+            project_id=body.project_id,
+            title=body.title,
+            description=body.description,
+        )
+    )
+
+
+@router.get("/project/{project_id}")
+async def list_tasks(
+    project_id: UUID,
+    task_repo=Depends(get_task_repo),
+    org_id=Depends(get_current_org_id),
+):
+    handler = ListTasksHandler(task_repo)
+
+    return await handler.handle(ListTasksQuery(project_id=project_id))
