@@ -19,11 +19,29 @@ class SqlAlchemyTaskRepo(TaskRepo):
                 org_id=task.org_id,
                 title=task.title,
                 description=task.description,
-                status=task.status,
+                status=task.status.value,
                 created_at=task.created_at,
             )
         )
         await self.session.commit()
+
+    async def get_by_id(self, task_id):
+        result = await self.session.execute(
+            select(TaskModel).where(TaskModel.id == task_id)
+        )
+
+        task = result.scalar_one_or_none()
+        if not task:
+            return None
+        return Task(
+            project_id=task.project_id,
+            org_id=task.org_id,
+            title=task.title,
+            description=task.description,
+            status=task.status,
+            created_at=task.created_at,
+            id=task.id,
+        )
 
     async def list_by_project(self, project_id: UUID) -> list[Task]:
         result = await self.session.execute(

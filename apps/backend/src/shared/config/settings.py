@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # Security
     JWT_SECRET: str = "sdfkj3l4j200()&*^&23jkjfkdfkjfkjwekr&*372jkjfkdf"
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 3600
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 60 * 24
 
     model_config = SettingsConfigDict(
         env_file=".env",

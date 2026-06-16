@@ -12,12 +12,12 @@ class Task(Entity):
     org_id: UUID
     title: str
     description: str | None = None
-    status: TaskStatus = TaskStatus.TODO
+    status: TaskStatus = TaskStatus.todo
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 ALLOWED_TRANSITIONS = {
-    TaskStatus.TODO: {TaskStatus.IN_PROGRESS},
-    TaskStatus.IN_PROGRESS: {TaskStatus.DONE},
-    TaskStatus.DONE: set(),
+    TaskStatus.todo: {TaskStatus.in_progress},
+    TaskStatus.in_progress: {TaskStatus.done},
+    TaskStatus.done: set(),
 }

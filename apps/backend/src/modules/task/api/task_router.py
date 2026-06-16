@@ -2,10 +2,14 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from src.modules.project.api.project_router import get_project_repo
 from src.modules.task.application.commands.create_task.command import CreateTaskCommand
 from src.modules.task.application.commands.create_task.handler import CreateTaskHandler
+from src.modules.task.application.commands.update_task.command import UpdateTaskCommand
+from src.modules.task.application.commands.update_task.handler import UpdateTaskHandler
 from src.modules.task.application.queries.list_tasks.handler import ListTasksHandler
 from src.modules.task.application.queries.list_tasks.query import ListTasksQuery
+from src.modules.task.domain.value_objects.task_status import TaskStatus
 from src.modules.task.infrastructure.persistence.sqlalchemy_task_repo import (
     SqlAlchemyTaskRepo,
 )
@@ -53,3 +57,30 @@ async def list_tasks(
     handler = ListTasksHandler(task_repo)
 
     return await handler.handle(ListTasksQuery(project_id=project_id))
+
+
+class UpdateTaskRequest(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    status: TaskStatus | None = None
+
+
+@router.patch("/{task_id}")
+async def update_task(
+    task_id: UUID,
+    body: UpdateTaskRequest,
+    org_id=Depends(get_current_org_id),
+    task_repo=Depends(get_task_repo),
+    project_repo=Depends(get_project_repo),
+):
+    handler = UpdateTaskHandler(task_repo, project_repo)
+
+    return await handler.handle(
+        UpdateTaskCommand(
+            org_id=org_id,
+            task_id=task_id,
+            title=body.title,
+            description=body.description,
+            status=body.status,
+        )
+    )

@@ -23,6 +23,20 @@ class SqlAlchemyProjectRepo(ProjectRepository):
         )
         await self.session.commit()
 
+    async def get_by_id(self, project_id: UUID) -> Project | None:
+        result = await self.session.execute(
+            select(ProjectModel).where(ProjectModel.id == project_id)
+        )
+        project = result.scalar_one_or_none()
+
+        return project and Project(
+            org_id=project.org_id,
+            name=project.name,
+            description=project.description,
+            created_at=project.created_at,
+            id=project.id,
+        )
+
     async def list_by_org(self, org_id: UUID) -> list[Project]:
         result = await self.session.execute(
             select(ProjectModel).where(ProjectModel.org_id == org_id)

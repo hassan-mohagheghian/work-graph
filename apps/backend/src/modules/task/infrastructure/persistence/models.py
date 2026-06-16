@@ -1,7 +1,7 @@
 import uuid
-from enum import Enum
 
 from sqlalchemy import Column, String
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from src.modules.task.domain.value_objects.task_status import TaskStatus
@@ -17,6 +17,6 @@ class TaskModel(IDMixin, CreateAtMixin, Base):
     org_id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String(200), unique=True, nullable=False)
     description: Mapped[str | None]
-    status: Mapped[str] = mapped_column(
-        Enum(TaskStatus, name="task_status"), default=TaskStatus.TODO
+    status: Mapped[TaskStatus] = mapped_column(
+        SAEnum(TaskStatus, name="task_status"), default=TaskStatus.todo
     )

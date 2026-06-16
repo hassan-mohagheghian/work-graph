@@ -10,5 +10,9 @@ class ProjectRepository(ABC):
         pass
 
     @abstractmethod
+    async def get_by_id(self, project_id: UUID) -> Project | None:
+        pass
+
+    @abstractmethod
     async def list_by_org(self, org_id: UUID) -> list[Project]:
         pass
