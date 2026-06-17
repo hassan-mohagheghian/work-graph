@@ -62,3 +62,18 @@ class SqlAlchemyTaskRepo(TaskRepo):
             )
             for r in rows
         ]
+
+    async def update(self, task: Task) -> None:
+        result = await self.session.execute(
+            select(TaskModel).where(TaskModel.id == task.id)
+        )
+        model = result.scalar_one_or_none()
+
+        if not model:
+            raise ValueError("Task not found")
+
+        model.title = task.title
+        model.description = task.description
+        model.status = task.status
+
+        await self.session.commit()

@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from src.modules.project.domain.repos.project_repo import ProjectRepository
 from src.modules.task.application.commands.update_task.command import UpdateTaskCommand
+from src.modules.task.domain.exceptions import InvalidTaskTransitionError
 from src.modules.task.domain.repos.task_repo import TaskRepo
 
 
@@ -29,10 +30,11 @@ class UpdateTaskHandler:
             task.description = cmd.description
 
         if cmd.status is not None:
-            task.status = cmd.status
+            try:
+                task.change_status(cmd.status)
+            except InvalidTaskTransitionError as e:
+                raise HTTPException(status_code=400, detail=str(e))
 
-        print(task)
-
-        # await self.task_repo.update(task)
+        await self.task_repo.update(task)
 
         return task

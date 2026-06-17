@@ -15,3 +15,6 @@ class TaskRepo(ABC):
 
     async def get_by_id(self, task_id: UUID) -> Task:
         pass
+
+    async def update(self, task: Task) -> None:
+        pass
