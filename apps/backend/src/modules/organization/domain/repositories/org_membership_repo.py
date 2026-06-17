@@ -28,17 +28,13 @@ class OrgMembershipRepo(ABC):
         pass
 
     @abstractmethod
+    async def get_role(self, user_id: UUID, org_id: UUID) -> OrgRole | None:
+        pass
+
+    @abstractmethod
     async def get_by_user_and_org(
         self, user_id: UUID, org_id: UUID
     ) -> OrgMembership | None:
-        pass
-
-    @abstractmethod
-    async def list_by_org(self, org_id: UUID) -> list[OrgMembership]:
-        pass
-
-    @abstractmethod
-    async def list_members_by_org(self, org_id: UUID) -> list[OrgMember]:
         pass
 
     @abstractmethod
@@ -55,4 +51,12 @@ class OrgMembershipRepo(ABC):
 
     @abstractmethod
     async def count_owners(self, org_id: UUID) -> int:
+        pass
+
+    @abstractmethod
+    async def list_by_org(self, org_id: UUID) -> list[OrgMembership]:
+        pass
+
+    @abstractmethod
+    async def list_members_by_org(self, org_id: UUID) -> list[OrgMember]:
         pass

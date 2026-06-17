@@ -70,6 +70,19 @@ class SQLAlchemyOrgMembershipRepo(OrgMembershipRepo):
             created_at=org_membership_model.created_at,
         )
 
+    async def get_role(self, user_id, org_id) -> OrgRole | None:
+        result = await self.session.execute(
+            select(OrgMembershipModel).where(
+                OrgMembershipModel.user_id == user_id,
+                OrgMembershipModel.org_id == org_id,
+            )
+        )
+        membership = result.scalar_one_or_none()
+
+        if not membership:
+            return None
+        return OrgRole(membership.role)
+
     async def list_by_org(self, org_id: UUID) -> list[OrgMembership]:
         result = await self.session.execute(
             select(OrgMembershipModel).where(OrgMembershipModel.org_id == org_id)
