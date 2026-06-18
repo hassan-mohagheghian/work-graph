@@ -13,8 +13,21 @@ class TaskRepo(ABC):
     async def list_by_project(self, project_id: UUID) -> list[Task]:
         pass
 
+    @abstractmethod
     async def get_by_id(self, task_id: UUID) -> Task:
         pass
 
+    @abstractmethod
     async def update(self, task: Task) -> None:
+        pass
+
+    @abstractmethod
+    async def list(
+        self,
+        org_id: UUID,
+        project_id: UUID,
+        status: str | None = None,
+        limit: int | None = 10,
+        offset: int | None = 0,
+    ):
         pass

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from src.modules.project.api.project_router import get_project_repo
 from src.modules.task.application.commands.create_task.command import CreateTaskCommand
@@ -52,7 +52,7 @@ async def create_task(
 
 
 @router.get("/project/{project_id}")
-async def list_tasks(
+async def list_tasks_by_project(
     project_id: UUID,
     task_repo=Depends(get_task_repo),
     org_id=Depends(get_current_org_id),
@@ -95,3 +95,27 @@ async def update_task(
             status=body.status,
         )
     )
+
+
+@router.get("/tasks")
+async def list_tasks(
+    project_id: UUID | None = None,
+    status: str | None = None,
+    limit: int = Query(20, le=100),
+    offset: int = Query(0, ge=0),
+    org_id=Depends(get_current_org_id),
+    task_repo: ListTasksHandler = Depends(get_task_repo),
+):
+    handler = ListTasksHandler(task_repo=task_repo)
+    query = ListTasksQuery(
+        org_id=org_id, project_id=project_id, status=status, limit=limit, offset=offset
+    )
+    query = ListTasksQuery(
+        org_id=org_id,
+        project_id=project_id,
+        status=status,
+        limit=limit,
+        offset=offset,
+    )
+
+    return await handler.handle(query)

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.task.domain.entities.task import Task
 from src.modules.task.domain.repos.task_repo import TaskRepo
@@ -23,6 +23,21 @@ class SqlAlchemyTaskRepo(TaskRepo):
                 created_at=task.created_at,
             )
         )
+        await self.session.commit()
+
+    async def update(self, task: Task) -> None:
+        result = await self.session.execute(
+            select(TaskModel).where(TaskModel.id == task.id)
+        )
+        model = result.scalar_one_or_none()
+
+        if not model:
+            raise ValueError("Task not found")
+
+        model.title = task.title
+        model.description = task.description
+        model.status = task.status
+
         await self.session.commit()
 
     async def get_by_id(self, task_id):
@@ -63,17 +78,30 @@ class SqlAlchemyTaskRepo(TaskRepo):
             for r in rows
         ]
 
-    async def update(self, task: Task) -> None:
-        result = await self.session.execute(
-            select(TaskModel).where(TaskModel.id == task.id)
-        )
-        model = result.scalar_one_or_none()
+    async def list(
+        self, org_id, project_id, status=None, limit=10, offset=0
+    ) -> list[Task]:
+        stmt = select(TaskModel).where(TaskModel.org_id == org_id)
+        if project_id:
+            stmt = stmt.where(TaskModel.project_id == project_id)
 
-        if not model:
-            raise ValueError("Task not found")
+        if status:
+            stmt = stmt.where(TaskModel.status == status)
 
-        model.title = task.title
-        model.description = task.description
-        model.status = task.status
+        stmt = stmt.order_by(desc(TaskModel.created_at))
+        stmt = stmt.limit(limit=limit).offset(offset=offset)
 
-        await self.session.commit()
+        result = await self.session.execute(stmt)
+        rows = result.scalars().all()
+        return [
+            Task(
+                project_id=row.project_id,
+                org_id=row.org_id,
+                title=row.title,
+                description=row.description,
+                status=row.status,
+                created_at=row.created_at,
+                id=row.id,
+            )
+            for row in rows
+        ]
