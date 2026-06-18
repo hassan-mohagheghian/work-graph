@@ -3,10 +3,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from src.modules.project.api.project_router import get_project_repo
+from src.modules.task.api.mappers.task_list_mapper import TaskListResponseMapper
 from src.modules.task.application.commands.create_task.command import CreateTaskCommand
 from src.modules.task.application.commands.create_task.handler import CreateTaskHandler
 from src.modules.task.application.commands.update_task.command import UpdateTaskCommand
 from src.modules.task.application.commands.update_task.handler import UpdateTaskHandler
+from src.modules.task.application.queries.get_task.handler import GetTaskHandler
+from src.modules.task.application.queries.get_task.query import GetTaskQuery
 from src.modules.task.application.queries.list_tasks.handler import ListTasksHandler
 from src.modules.task.application.queries.list_tasks.query import ListTasksQuery
 from src.modules.task.application.services.task_rbac import TaskRBAC
@@ -104,7 +107,7 @@ async def list_tasks(
     limit: int = Query(20, le=100),
     offset: int = Query(0, ge=0),
     org_id=Depends(get_current_org_id),
-    task_repo: ListTasksHandler = Depends(get_task_repo),
+    task_repo=Depends(get_task_repo),
 ):
     handler = ListTasksHandler(task_repo=task_repo)
     query = ListTasksQuery(
@@ -118,4 +121,18 @@ async def list_tasks(
         offset=offset,
     )
 
-    return await handler.handle(query)
+    result = await handler.handle(query)
+    return TaskListResponseMapper.to_response(result)
+
+
+@router.get("/{task_id}")
+async def get_task(
+    task_id: UUID,
+    org_id=Depends(get_current_org_id),
+    task_repo=Depends(
+        get_task_repo,
+    ),
+):
+
+    handler = GetTaskHandler(task_repo=task_repo)
+    return await handler.handle(GetTaskQuery(task_id=task_id, org_id=org_id))
