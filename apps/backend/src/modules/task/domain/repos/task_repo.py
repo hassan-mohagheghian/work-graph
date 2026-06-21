@@ -10,6 +10,10 @@ class TaskRepo(ABC):
         pass
 
     @abstractmethod
+    async def delete(self, task_id: UUID) -> None:
+        pass
+
+    @abstractmethod
     async def list_by_project(self, project_id: UUID) -> list[Task]:
         pass
 

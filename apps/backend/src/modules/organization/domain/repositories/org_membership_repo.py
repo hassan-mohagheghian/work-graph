@@ -24,7 +24,7 @@ class OrgMembershipRepo(ABC):
         pass
 
     @abstractmethod
-    async def exits(self, org_id: UUID, user_id: UUID) -> bool:
+    async def exists(self, org_id: UUID, user_id: UUID) -> bool:
         pass
 
     @abstractmethod

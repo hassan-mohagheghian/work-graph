@@ -6,6 +6,8 @@ from src.modules.project.api.project_router import get_project_repo
 from src.modules.task.api.mappers.task_list_mapper import TaskListResponseMapper
 from src.modules.task.application.commands.create_task.command import CreateTaskCommand
 from src.modules.task.application.commands.create_task.handler import CreateTaskHandler
+from src.modules.task.application.commands.delete_task.command import DeleteTaskCommand
+from src.modules.task.application.commands.delete_task.handler import DeleteTaskHandler
 from src.modules.task.application.commands.update_task.command import UpdateTaskCommand
 from src.modules.task.application.commands.update_task.handler import UpdateTaskHandler
 from src.modules.task.application.queries.get_task.handler import GetTaskHandler
@@ -100,7 +102,7 @@ async def update_task(
     )
 
 
-@router.get("/tasks")
+@router.get("")
 async def list_tasks(
     project_id: UUID | None = None,
     status: str | None = None,
@@ -129,10 +131,28 @@ async def list_tasks(
 async def get_task(
     task_id: UUID,
     org_id=Depends(get_current_org_id),
-    task_repo=Depends(
-        get_task_repo,
-    ),
+    task_repo=Depends(get_task_repo),
 ):
 
     handler = GetTaskHandler(task_repo=task_repo)
     return await handler.handle(GetTaskQuery(task_id=task_id, org_id=org_id))
+
+
+@router.delete("/{task_id}")
+async def delete_task(
+    task_id: UUID,
+    user_id: UUID = Depends(get_current_user_id),
+    org_id: UUID = Depends(get_current_org_id),
+    task_repo=Depends(get_task_repo),
+    org_membership_facade=Depends(get_org_membership_facade),
+):
+    handler = DeleteTaskHandler(
+        task_repo=task_repo,
+        org_membership_facade=org_membership_facade,
+        rbac=TaskRBAC(),
+    )
+    await handler.handle(
+        DeleteTaskCommand(task_id=task_id, org_id=org_id, user_id=user_id)
+    )
+
+    return {"status": "deleted"}

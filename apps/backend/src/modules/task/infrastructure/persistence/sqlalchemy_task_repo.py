@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import desc, select
+from sqlalchemy import delete, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.task.domain.entities.task import Task
 from src.modules.task.domain.repos.task_repo import TaskRepo
@@ -23,6 +23,11 @@ class SqlAlchemyTaskRepo(TaskRepo):
                 created_at=task.created_at,
             )
         )
+        await self.session.commit()
+
+    async def delete(self, task_id) -> None:
+        await self.session.execute(delete(TaskModel).where(TaskModel.id == task_id))
+
         await self.session.commit()
 
     async def update(self, task: Task) -> None:

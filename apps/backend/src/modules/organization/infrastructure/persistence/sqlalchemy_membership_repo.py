@@ -37,7 +37,7 @@ class SQLAlchemyOrgMembershipRepo(OrgMembershipRepo):
         await self.session.execute(stmt)
         await self.session.commit()
 
-    async def exits(self, org_id, user_id):
+    async def exists(self, org_id, user_id):
         result = await self.session.execute(
             select(OrgMembershipModel).where(
                 OrgMembershipModel.user_id == user_id,

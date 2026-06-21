@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.modules.project.application.commands.create_project.command import (
@@ -58,8 +56,8 @@ async def create_project(
 
 @router.get("/org/{org_id}")
 async def list_projects(
-    org_id: UUID,
     project_repo=Depends(get_project_repo),
+    org_id=Depends(get_current_org_id),
 ):
     handler = ListProjectsHandler(project_repo)
 

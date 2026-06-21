@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { AuthButton } from "../../features/auth/components/auth-button";
-
 import { useEffect, useState } from "react";
+
+import { AuthButton } from "@/features/auth/components/auth-button";
 import { useActiveOrg } from "@/features/organization/hooks/use-active-org";
 
 import {
@@ -19,6 +19,7 @@ import {
 } from "@/shared/ui/dropdown-menu";
 
 import { Button } from "@/shared/ui/button";
+import { Separator } from "@/shared/ui/separator";
 
 export function Header() {
   const { activeOrgId, selectOrg, mounted } = useActiveOrg();
@@ -26,16 +27,10 @@ export function Header() {
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [activeOrgName, setActiveOrgName] = useState("Select org");
 
-  // load orgs
   useEffect(() => {
-    async function load() {
-      const data = await getOrganizations();
-      setOrgs(data);
-    }
-    load();
+    getOrganizations().then(setOrgs);
   }, []);
 
-  // resolve active org name
   useEffect(() => {
     const current = orgs.find((o) => o.id === activeOrgId);
     setActiveOrgName(current?.name || "Select org");
@@ -48,15 +43,38 @@ export function Header() {
   }
 
   return (
-    <header className="w-full border-b px-4 py-3 flex items-center justify-between">
+    <header className="w-full border-b px-4 h-14 flex items-center justify-between">
       {/* LEFT */}
-      <Link href="/" className="font-semibold">
-        WorkGraph
-      </Link>
+      <div className="flex items-center gap-4">
+        <Link href="/" className="font-semibold">
+          WorkGraph
+        </Link>
+
+        <Separator orientation="vertical" className="h-5" />
+
+        {/* NAV (ORG-BASED ROUTES) */}
+        {activeOrgId && (
+          <nav className="flex items-center gap-4 text-sm">
+            <Link
+              href={`/organizations/${activeOrgId}/projects`}
+              className="hover:underline"
+            >
+              Projects
+            </Link>
+
+            <Link
+              href={`/organizations/${activeOrgId}/members`}
+              className="hover:underline"
+            >
+              Members
+            </Link>
+          </nav>
+        )}
+      </div>
 
       {/* RIGHT */}
       <div className="flex items-center gap-3">
-        {/* Org Switcher */}
+        {/* ORG SWITCHER */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
@@ -64,7 +82,7 @@ export function Header() {
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-52">
             {orgs.map((org) => (
               <DropdownMenuItem key={org.id} onClick={() => handleSelect(org)}>
                 {org.name}
@@ -73,7 +91,7 @@ export function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Auth */}
+        {/* USER */}
         <AuthButton />
       </div>
     </header>

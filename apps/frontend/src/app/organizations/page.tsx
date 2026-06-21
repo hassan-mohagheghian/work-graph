@@ -6,12 +6,18 @@ import { useRouter } from "next/navigation";
 import { getOrganizations } from "@/features/organization/api/get-organizations";
 import { CreateOrganization } from "@/features/organization/components/create-organization";
 import { setActiveOrg } from "@/features/organization/model/active-org";
+import { useOrg } from "@/shared/context/org-context";
 
 export default function OrganizationsPage() {
   const router = useRouter();
+  const { setOrgId } = useOrg();
 
   const [orgs, setOrgs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    load();
+  }, []);
 
   async function load() {
     setLoading(true);
@@ -23,12 +29,9 @@ export default function OrganizationsPage() {
     }
   }
 
-  useEffect(() => {
-    load();
-  }, []);
-
   function handleSelect(orgId: string) {
     setActiveOrg(orgId);
+    setOrgId(orgId); // ✅ IMPORTANT
     router.push(`/organizations/${orgId}`);
   }
 
@@ -36,7 +39,6 @@ export default function OrganizationsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Organizations</h1>
-
         <CreateOrganization onSuccess={load} />
       </div>
 
