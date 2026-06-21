@@ -1,8 +1,29 @@
 "use client";
 
-import { useMembers } from "@/features/organization/hooks/use-members";
-import { useParams } from "next/navigation";
 import { useState } from "react";
+import { useParams } from "next/navigation";
+
+import { useMembers } from "@/features/organization/hooks/use-members";
+
+import { Input } from "@/shared/ui/input";
+import { Button } from "@/shared/ui/button";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/ui/table";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 export default function MembersPage() {
   const params = useParams();
@@ -12,68 +33,93 @@ export default function MembersPage() {
 
   const [email, setEmail] = useState("");
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return <div className="p-6">Loading...</div>;
+  }
 
   return (
     <div className="p-6 space-y-6">
-      {/* Invite */}
-      <div className="flex gap-2">
-        <input
-          className="border px-3 py-2"
-          placeholder="email"
+      {/* INVITE SECTION */}
+      <div className="flex gap-2 max-w-md">
+        <Input
+          placeholder="Invite user by email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <button
-          className="px-3 py-2 border"
+        <Button
           onClick={() => {
             invite(email, "member");
             setEmail("");
           }}
         >
           Invite
-        </button>
+        </Button>
       </div>
 
-      {/* Members list */}
-      <table className="w-full border">
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      {/* TABLE */}
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
 
-        <tbody>
-          {members.map((m) => (
-            <tr key={m.user_id} className="border-t">
-              <td>{m.email}</td>
-
-              <td>
-                <select
-                  value={m.role}
-                  onChange={(e) => changeRole(m.user_id, e.target.value as any)}
+          <TableBody>
+            {members?.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={3}
+                  className="text-center text-muted-foreground"
                 >
-                  <option value="owner">owner</option>
-                  <option value="admin">admin</option>
-                  <option value="member">member</option>
-                </select>
-              </td>
+                  No members found
+                </TableCell>
+              </TableRow>
+            ) : (
+              members.map((m) => (
+                <TableRow key={m.user_id}>
+                  {/* EMAIL */}
+                  <TableCell className="font-medium">{m.email}</TableCell>
 
-              <td>
-                <button
-                  className="text-red-500"
-                  onClick={() => remove(m.user_id)}
-                >
-                  Remove
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  {/* ROLE */}
+                  <TableCell>
+                    <Select
+                      value={m.role}
+                      onValueChange={(value) =>
+                        changeRole(m.user_id, value as any)
+                      }
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Role" />
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectItem value="owner">Owner</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="member">Member</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+
+                  {/* ACTIONS */}
+                  <TableCell className="text-right">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => remove(m.user_id)}
+                    >
+                      Remove
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

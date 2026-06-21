@@ -20,26 +20,31 @@ import {
 
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
+import { useRouter } from "next/navigation";
 
 export function Header() {
+  const router = useRouter();
   const { activeOrgId, selectOrg, mounted } = useActiveOrg();
 
   const [orgs, setOrgs] = useState<Organization[]>([]);
-  const [activeOrgName, setActiveOrgName] = useState("Select org");
+  const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
-    getOrganizations().then(setOrgs);
+    // replace later with real auth state
+    setIsAuthed(true);
   }, []);
 
   useEffect(() => {
-    const current = orgs.find((o) => o.id === activeOrgId);
-    setActiveOrgName(current?.name || "Select org");
-  }, [activeOrgId, orgs]);
+    if (isAuthed) {
+      getOrganizations().then(setOrgs);
+    }
+  }, [isAuthed]);
 
   if (!mounted) return null;
 
   function handleSelect(org: Organization) {
     selectOrg(org.id);
+    router.push(`/organizations/${org.id}/projects`);
   }
 
   return (
@@ -52,46 +57,45 @@ export function Header() {
 
         <Separator orientation="vertical" className="h-5" />
 
-        {/* NAV (ORG-BASED ROUTES) */}
-        {activeOrgId && (
+        {/* NAV ONLY IF AUTH + ORG */}
+        {isAuthed && activeOrgId && (
           <nav className="flex items-center gap-4 text-sm">
-            <Link
-              href={`/organizations/${activeOrgId}/projects`}
-              className="hover:underline"
-            >
+            <Link href={`/organizations/${activeOrgId}/projects`}>
               Projects
             </Link>
 
-            <Link
-              href={`/organizations/${activeOrgId}/members`}
-              className="hover:underline"
-            >
-              Members
-            </Link>
+            <Link href={`/organizations/${activeOrgId}/members`}>Members</Link>
+
+            <Link href={`/organizations/${activeOrgId}/tasks`}>Tasks</Link>
           </nav>
         )}
       </div>
 
       {/* RIGHT */}
       <div className="flex items-center gap-3">
-        {/* ORG SWITCHER */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              {activeOrgName}
-            </Button>
-          </DropdownMenuTrigger>
+        {/* ORG SWITCHER ONLY WHEN AUTH */}
+        {isAuthed && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                {activeOrgId ?? "Select org"}
+              </Button>
+            </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-52">
-            {orgs.map((org) => (
-              <DropdownMenuItem key={org.id} onClick={() => handleSelect(org)}>
-                {org.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <DropdownMenuContent align="end" className="w-52">
+              {orgs.map((org) => (
+                <DropdownMenuItem
+                  key={org.id}
+                  onClick={() => handleSelect(org)}
+                >
+                  {org.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
-        {/* USER */}
+        {/* ALWAYS SHOW */}
         <AuthButton />
       </div>
     </header>

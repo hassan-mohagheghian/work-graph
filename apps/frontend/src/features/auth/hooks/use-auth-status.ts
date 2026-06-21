@@ -10,6 +10,7 @@ export function useAuthStatus() {
   useEffect(() => {
     async function check() {
       try {
+        console.log("auth status");
         await getMe();
         setIsAuthenticated(true);
       } catch {

@@ -40,7 +40,7 @@ export function LoginForm() {
 
   async function onSubmit(values: LoginFormData) {
     await mutateAsync(values);
-    router.push(ROUTES.ORGANIZATIONS);
+    router.push(ROUTES.HOME);
   }
 
   return (
