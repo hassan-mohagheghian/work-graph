@@ -12,7 +12,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <Header />
-          {children}
+          <main className="pt-6">{children}</main>
         </Providers>
       </body>
     </html>

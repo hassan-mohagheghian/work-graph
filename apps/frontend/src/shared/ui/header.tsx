@@ -48,7 +48,7 @@ export function Header() {
   }
 
   return (
-    <header className="w-full border-b px-4 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-background  border-b px-4 h-16 flex items-center justify-between">
       {/* LEFT */}
       <div className="flex items-center gap-4">
         <Link href="/" className="font-semibold">
@@ -63,9 +63,6 @@ export function Header() {
             <Link href={`/organizations/${activeOrgId}/projects`}>
               Projects
             </Link>
-
-            <Link href={`/organizations/${activeOrgId}/members`}>Members</Link>
-
             <Link href={`/organizations/${activeOrgId}/tasks`}>Tasks</Link>
           </nav>
         )}
@@ -73,6 +70,7 @@ export function Header() {
 
       {/* RIGHT */}
       <div className="flex items-center gap-3">
+        <Link href={`/organizations/${activeOrgId}/members`}>Members</Link>
         {/* ORG SWITCHER ONLY WHEN AUTH */}
         {isAuthed && (
           <DropdownMenu>

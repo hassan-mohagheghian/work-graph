@@ -1,77 +1,87 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { createOrganization } from "../api/create-organization";
 
-type Props = {
-  onCreated?: () => void;
-};
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 
-export function CreateOrganization({ onCreated }: Props) {
-  const [open, setOpen] = useState(false);
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/ui/dialog";
+
+export function CreateOrganization() {
+  const queryClient = useQueryClient();
+
   const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleCreate() {
-    if (!name.trim()) return;
-
-    setLoading(true);
-
-    try {
-      await createOrganization({ name });
+  const mutation = useMutation({
+    mutationFn: createOrganization,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["organizations"],
+      });
 
       setName("");
       setOpen(false);
+      setError(null);
+    },
+    onError: (err: any) => {
+      setError(err?.message ?? "Something went wrong");
+    },
+  });
 
-      onCreated?.();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  function handleCreate() {
+    if (!name.trim()) return;
+    mutation.mutate({ name });
   }
 
   return (
-    <div>
-      <button
-        onClick={() => setOpen(true)}
-        className="px-3 py-2 border rounded"
-      >
-        + Create Organization
-      </button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {/* TRIGGER */}
+      <DialogTrigger asChild>
+        <Button>+ Create Organization</Button>
+      </DialogTrigger>
 
-      {open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-4 rounded w-80">
-            <h2 className="font-semibold mb-3">Create Organization</h2>
+      {/* MODAL */}
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Organization</DialogTitle>
+        </DialogHeader>
 
-            <input
-              className="border w-full p-2"
-              placeholder="Organization name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+        <div className="space-y-4">
+          <Input
+            placeholder="Organization name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  setError("");
-                }}
-              >
-                Cancel
-              </button>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setName("");
+                setError("");
+              }}
+            >
+              Reset
+            </Button>
 
-              <button onClick={handleCreate} disabled={loading}>
-                {loading ? "Creating..." : "Create"}
-              </button>
-            </div>
-            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+            <Button onClick={handleCreate} disabled={mutation.isPending}>
+              {mutation.isPending ? "Creating..." : "Create"}
+            </Button>
           </div>
         </div>
-      )}
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
