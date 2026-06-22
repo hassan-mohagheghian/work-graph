@@ -1,6 +1,11 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from src.modules.identity.api.auth_router import RegisterUserRequest
+from src.modules.identity.application.commands.register_user import RegisterUserCommand
+from src.modules.identity.application.commands.register_user_handler import (
+    RegisterUerHandler,
+)
 from src.modules.identity.application.queries.get_me.handler import GetMeQueryHandler
 from src.modules.identity.application.queries.get_me.query import GetMeQuery
 from src.modules.identity.application.queries.get_user_profile.handler import (
@@ -8,6 +13,9 @@ from src.modules.identity.application.queries.get_user_profile.handler import (
 )
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
+)
+from src.modules.identity.infrastructure.security.argon2_password_hasher import (
+    Argon2PasswordHasher,
 )
 from src.modules.organization.api.org_router import get_org_repo
 from src.shared.config.database import AsyncSessionLocal
@@ -19,6 +27,25 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def get_user_repo():
     async with AsyncSessionLocal() as session:
         yield SQLAlchemyUserRepository(session=session)
+
+
+@router.post("/register")
+async def register_user(
+    req: RegisterUserRequest,
+    repo: SQLAlchemyUserRepository = Depends(get_user_repo),
+):
+    handler = RegisterUerHandler(repo, password_hasher=Argon2PasswordHasher())
+    command = RegisterUserCommand(
+        email=req.email,
+        display_name=req.display_name,
+        password=req.password,
+    )
+    user = await handler.handle(command=command)
+    return {
+        "id": str(user.id),
+        "email": user.email,
+        "display_name": user.display_name,
+    }
 
 
 @router.get("/profile")

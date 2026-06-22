@@ -1,10 +1,6 @@
 from fastapi import APIRouter, Depends, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
-from src.modules.identity.application.commands.register_user import RegisterUserCommand
-from src.modules.identity.application.commands.register_user_handler import (
-    RegisterUerHandler,
-)
 from src.modules.identity.application.queries.login_user.handler import (
     LoginUserHandler,
 )
@@ -49,27 +45,8 @@ async def get_password_hasher():
     Argon2PasswordHasher
 
 
-@router.post("/register")
-async def register_user(
-    req: RegisterUserRequest,
-    repo: SQLAlchemyUserRepository = Depends(get_user_repo),
-):
-    handler = RegisterUerHandler(repo, password_hasher=Argon2PasswordHasher())
-    command = RegisterUserCommand(
-        email=req.email,
-        display_name=req.display_name,
-        password=req.password,
-    )
-    user = await handler.handle(command=command)
-    return {
-        "id": str(user.id),
-        "email": user.email,
-        "display_name": user.display_name,
-    }
-
-
 @router.post("/login")
-async def login_user(
+async def login(
     response: Response,
     req: OAuth2PasswordRequestForm = Depends(),
     repo: SQLAlchemyUserRepository = Depends(get_user_repo),
