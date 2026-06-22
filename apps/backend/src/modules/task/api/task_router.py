@@ -22,7 +22,10 @@ from src.modules.task.infrastructure.persistence.sqlalchemy_task_repo import (
 from src.shared.config.database import AsyncSessionLocal
 from src.shared.infrastructure.dependencies.auth import get_current_user_id
 from src.shared.infrastructure.dependencies.org import get_org_membership_facade
-from src.shared.infrastructure.dependencies.org_context import get_current_org_id
+from src.shared.infrastructure.dependencies.org_context import (
+    get_current_org_id,
+    get_current_org_id_v1,
+)
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -42,7 +45,7 @@ class CreateTaskRequest(BaseModel):
 async def create_task(
     body: CreateTaskRequest,
     task_repo=Depends(get_task_repo),
-    org_id=Depends(get_current_org_id),
+    org_id=Depends(get_current_org_id_v1),
 ):
     handler = CreateTaskHandler(task_repo)
 
