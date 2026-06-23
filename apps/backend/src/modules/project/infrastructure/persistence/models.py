@@ -15,3 +15,13 @@ class ProjectModel(IDMixin, CreateAtMixin, Base):
 
     def __str__(self):
         return f"id={id}"
+
+
+class ProjectMembershipModel(IDMixin, CreateAtMixin, Base):
+    __table_args__ = {"schema": "project"}
+    __tablename__ = "project_memberships"
+
+    project_id = Column(PG_UUID(as_uuid=True), nullable=False, index=True)
+    org_id = Column(PG_UUID(as_uuid=True), nullable=False, index=True)
+    user_id = Column(PG_UUID(as_uuid=True), nullable=False, index=True)
+    role = Column(String(20), nullable=False, default="member")

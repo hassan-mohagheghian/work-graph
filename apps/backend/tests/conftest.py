@@ -9,10 +9,12 @@ from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository 
     SQLAlchemyUserRepository,
 )
 from src.modules.organization.infrastructure.persistence.models import Base as OrgBase
+from src.modules.project.infrastructure.persistence.models import Base as ProjectBase
+from src.modules.task.infrastructure.persistence.models import Base as TaskBase
 
 DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/workgraph_test"
 ADMIN_DB_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
-SCHEMAS = ["identity", "org"]
+SCHEMAS = ["identity", "org", "project", "task"]
 
 
 async def ensure_test_db():
@@ -57,6 +59,8 @@ async def engine():
         # ✅ Create all tables in metadata
         await conn.run_sync(IdentityBase.metadata.create_all)
         await conn.run_sync(OrgBase.metadata.create_all)
+        await conn.run_sync(ProjectBase.metadata.create_all)
+        await conn.run_sync(TaskBase.metadata.create_all)
 
     yield engine
 
