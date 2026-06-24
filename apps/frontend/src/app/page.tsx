@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { Button } from "@/shared/ui/button";
@@ -16,10 +18,6 @@ export default function HomePage() {
           </p>
 
           <div className="flex gap-3">
-            <Button asChild>
-              <Link href="/login">Get Started</Link>
-            </Button>
-
             <Button variant="outline" asChild>
               <Link href="/organizations">Organizations</Link>
             </Button>
