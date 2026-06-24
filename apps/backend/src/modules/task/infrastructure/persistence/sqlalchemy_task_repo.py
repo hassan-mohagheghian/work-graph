@@ -106,6 +106,7 @@ class SqlAlchemyTaskRepo(TaskRepo):
                 description=row.description,
                 status=row.status,
                 created_at=row.created_at,
+                updated_at=row.updated_at,
                 id=row.id,
             )
             for row in rows

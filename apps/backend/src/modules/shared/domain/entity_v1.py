@@ -14,10 +14,12 @@ class Entity:
         return hash(self.id)
 
 
+@dataclass(kw_only=True)
 class CreatedAtMixin:
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+@dataclass(kw_only=True)
 class TimestampedMixin:
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
