@@ -2,6 +2,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from src.modules.identity.api.auth_router import get_user_repo
+from src.modules.identity.domain.repositories.user_repository import UserRepository
 from src.modules.project.application.commands.add_project_member.command import (
     AddProjectMemberCommand,
 )
@@ -17,11 +19,20 @@ from src.modules.project.application.commands.create_project.handler import (
 from src.modules.project.application.commands.remove_project_member.command import (
     RemoveProjectMemberCommand,
 )
+from src.modules.project.application.commands.remove_project_member.handler import (
+    RemoveProjectMemberHandler,
+)
 from src.modules.project.application.commands.update_project_member.command import (
     UpdateProjectMemberRoleCommand,
 )
 from src.modules.project.application.commands.update_project_member.handler import (
     UpdateProjectMemberRoleHandler,
+)
+from src.modules.project.application.queries.list_project_members.handler import (
+    ListProjectMembersHandler,
+)
+from src.modules.project.application.queries.list_project_members.query import (
+    ListProjectMembersQuery,
 )
 from src.modules.project.application.queries.list_projects.handler import (
     ListProjectsHandler,
@@ -83,18 +94,30 @@ async def list_projects(
     return await handler.handle(ListProjectsQuery(org_id=org_id))
 
 
+@router.get("/{project_id}/members")
+async def get_project_members(
+    project_id: UUID,
+    project_membership_repo: ProjectMembership = Depends(get_project_membership_repo),
+):
+    handler = ListProjectMembersHandler(repository=project_membership_repo)
+    query = ListProjectMembersQuery(project_id=project_id)
+
+    return await handler.handle(query=query)
+
+
 @router.post("/{project_id}/members")
 async def add_member(
     project_id: UUID,
     body: dict,
     project_membership_repo: ProjectMembership = Depends(get_project_membership_repo),
+    user_repo: UserRepository = Depends(get_user_repo),
 ):
-    handler = AddProjectMemberHandler(repo=project_membership_repo)
+    handler = AddProjectMemberHandler(repo=project_membership_repo, user_repo=user_repo)
     return await handler.handle(
         AddProjectMemberCommand(
             project_id=project_id,
             org_id=body["org_id"],
-            user_id=body["user_id"],
+            email=body["email"],
             role=body.get("role", "member"),
         )
     )
@@ -121,7 +144,7 @@ async def remove_member(
     user_id: UUID,
     project_membership_repo: ProjectMembership = Depends(get_project_membership_repo),
 ):
-    handler = UpdateProjectMemberRoleHandler(repo=project_membership_repo)
+    handler = RemoveProjectMemberHandler(repo=project_membership_repo)
     return await handler.handle(
         RemoveProjectMemberCommand(project_id=project_id, user_id=user_id)
     )

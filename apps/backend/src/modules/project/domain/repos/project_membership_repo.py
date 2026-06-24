@@ -1,14 +1,20 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
+from src.modules.project.domain.entities.project_membership import ProjectMembership
+
 
 class ProjectMembershipRepo(ABC):
     @abstractmethod
-    async def add(self, project_id: UUID, org_id: UUID, user_id: UUID, role: str):
+    async def add(self, membership: ProjectMembership):
         pass
 
     @abstractmethod
     async def get_role(self, project_id: UUID, user_id: UUID) -> str:
+        pass
+
+    @abstractmethod
+    async def list_by_project(self, project_id: UUID) -> list[ProjectMembership]:
         pass
 
     @abstractmethod

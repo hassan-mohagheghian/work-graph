@@ -6,5 +6,5 @@ from uuid import UUID
 class AddProjectMemberCommand:
     project_id: UUID
     org_id: UUID
-    user_id: UUID
+    email: UUID
     role: str = "member"
