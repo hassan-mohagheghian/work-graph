@@ -12,7 +12,6 @@ export function useRedirectIfAuth() {
   useEffect(() => {
     async function checkAuth() {
       try {
-        console.log("from redirect");
         await getMe();
 
         router.replace(ROUTES.HOME);

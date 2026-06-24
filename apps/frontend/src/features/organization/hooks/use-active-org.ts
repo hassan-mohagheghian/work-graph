@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getActiveOrg, setActiveOrg } from "../model/active-org";
+
+import {
+  getActiveOrg,
+  setActiveOrg,
+  clearActiveOrg,
+} from "../model/active-org";
 
 export function useActiveOrg() {
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -17,9 +23,15 @@ export function useActiveOrg() {
     setActiveOrgId(orgId);
   }
 
+  function clearOrg() {
+    clearActiveOrg();
+    setActiveOrgId(null);
+  }
+
   return {
     activeOrgId,
     selectOrg,
+    clearOrg,
     mounted,
   };
 }

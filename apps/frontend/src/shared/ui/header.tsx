@@ -1,100 +1,120 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 import { AuthButton } from "@/features/auth/components/auth-button";
-import { useActiveOrg } from "@/features/organization/hooks/use-active-org";
+import { useMe } from "@/features/auth/hooks/use-me";
 
-import {
-  getOrganizations,
-  Organization,
-} from "@/features/organization/api/get-organizations";
+import { useActiveOrg } from "@/features/organization/hooks/use-active-org";
+import { useOrganizations } from "@/features/organization/hooks/use-organizations";
 
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/shared/ui/dropdown-menu";
 
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
-import { useRouter } from "next/navigation";
+import { useLogout } from "@/features/auth/hooks/use-logout";
 
 export function Header() {
   const router = useRouter();
+
   const { activeOrgId, selectOrg, mounted } = useActiveOrg();
 
-  const [orgs, setOrgs] = useState<Organization[]>([]);
-  const [isAuthed, setIsAuthed] = useState(false);
+  const { data: user, isLoading } = useMe();
+  const { logout } = useLogout();
 
-  useEffect(() => {
-    // replace later with real auth state
-    setIsAuthed(true);
-  }, []);
+  const isAuthed = !!user;
 
-  useEffect(() => {
-    if (isAuthed) {
-      getOrganizations().then(setOrgs);
-    }
-  }, [isAuthed]);
+  const { data: orgs = [] } = useOrganizations(isAuthed);
 
-  if (!mounted) return null;
+  const activeOrg = useMemo(
+    () => orgs.find((o) => o.id === activeOrgId),
+    [orgs, activeOrgId],
+  );
 
-  function handleSelect(org: Organization) {
+  if (!mounted || isLoading) {
+    return null;
+  }
+
+  function handleSelect(org: (typeof orgs)[number]) {
     selectOrg(org.id);
     router.push(`/organizations/${org.id}/projects`);
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background  border-b px-4 h-16 flex items-center justify-between">
-      {/* LEFT */}
-      <div className="flex items-center gap-4">
-        <Link href="/" className="font-semibold">
-          WorkGraph
-        </Link>
+    <header className="sticky top-0 z-50 h-16 border-b bg-background">
+      {" "}
+      <div className="container mx-auto flex h-full items-center justify-between px-4">
+        {/* LEFT */}{" "}
+        <div className="flex items-center gap-4">
+          {" "}
+          <Link href="/" className="font-semibold">
+            WorkGraph{" "}
+          </Link>
+          {isAuthed && activeOrgId && (
+            <>
+              <Separator orientation="vertical" className="h-5" />
 
-        <Separator orientation="vertical" className="h-5" />
+              <nav className="flex items-center gap-5 text-sm">
+                <Link href={`/organizations/${activeOrgId}/projects`}>
+                  Projects
+                </Link>
 
-        {/* NAV ONLY IF AUTH + ORG */}
-        {isAuthed && activeOrgId && (
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href={`/organizations/${activeOrgId}/projects`}>
-              Projects
-            </Link>
-            <Link href={`/organizations/${activeOrgId}/tasks`}>Tasks</Link>
-          </nav>
-        )}
-      </div>
+                <Link href={`/organizations/${activeOrgId}/tasks`}>Tasks</Link>
+              </nav>
+            </>
+          )}
+        </div>
+        {/* RIGHT */}
+        <div className="flex items-center gap-3">
+          {isAuthed && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  {activeOrg?.name ?? "Select Organization"}
+                </Button>
+              </DropdownMenuTrigger>
 
-      {/* RIGHT */}
-      <div className="flex items-center gap-3">
-        <Link href={`/organizations/${activeOrgId}/members`}>Members</Link>
-        {/* ORG SWITCHER ONLY WHEN AUTH */}
-        {isAuthed && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                {activeOrgId ?? "Select org"}
-              </Button>
-            </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60">
+                {activeOrgId && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        router.push(`/organizations/${activeOrgId}/members`)
+                      }
+                    >
+                      Members
+                    </DropdownMenuItem>
 
-            <DropdownMenuContent align="end" className="w-52">
-              {orgs.map((org) => (
-                <DropdownMenuItem
-                  key={org.id}
-                  onClick={() => handleSelect(org)}
-                >
-                  {org.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+                    <DropdownMenuItem disabled>
+                      Organization Settings
+                    </DropdownMenuItem>
 
-        {/* ALWAYS SHOW */}
-        <AuthButton />
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+
+                {orgs.map((org) => (
+                  <DropdownMenuItem
+                    key={org.id}
+                    onClick={() => handleSelect(org)}
+                  >
+                    {org.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          <AuthButton onLogout={logout} isAuthenticated={isAuthed} />
+        </div>
       </div>
     </header>
   );

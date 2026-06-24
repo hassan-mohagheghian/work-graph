@@ -4,17 +4,12 @@ import Link from "next/link";
 
 import { Button } from "@/shared/ui/button";
 
-import { useAuthStatus } from "../hooks/use-auth-status";
-import { useLogout } from "../hooks/use-logout";
+type AuthButtonProps = {
+  isAuthenticated: boolean;
+  onLogout: () => void;
+};
 
-export function AuthButton() {
-  const { isAuthenticated, isLoading } = useAuthStatus();
-  const { logout } = useLogout();
-
-  if (isLoading) {
-    return null;
-  }
-
+export function AuthButton({ isAuthenticated, onLogout }: AuthButtonProps) {
   if (!isAuthenticated) {
     return (
       <Link href="/login">
@@ -24,7 +19,7 @@ export function AuthButton() {
   }
 
   return (
-    <Button variant="outline" onClick={logout}>
+    <Button variant="outline" onClick={onLogout}>
       Logout
     </Button>
   );
