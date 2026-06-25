@@ -1,190 +1,68 @@
 # WorkGraph
 
-**Tagline:** Connect work, knowledge, and intelligence.
+**Connect goals, work, knowledge, and intelligence.**
 
----
+WorkGraph is an AI-powered workspace that helps teams transform knowledge into execution.
 
-## Overview
+Instead of managing projects, tasks, documents, and planning across multiple disconnected tools, WorkGraph brings them together into a single platform where goals, knowledge, and execution remain connected.
 
-WorkGraph is a multi-tenant project and knowledge management platform designed around Domain-Driven Design (DDD), Hexagonal Architecture, and CQRS principles.
+The long-term vision is:
 
-The goal is to provide a unified workspace where teams can manage projects, documentation, and AI-assisted workflows through a single platform.
-
-This repository follows a modular monolith approach, allowing future extraction of domains into independent services when required.
+```text
+Goals
+  ↓
+Knowledge
+  ↓
+Roadmap
+  ↓
+Milestones
+  ↓
+Tasks
+  ↓
+Execution
+```
 
 ---
 
 ## Current Status
 
-### Phase
-
-MVP Foundation
+WorkGraph is under active development.
 
 ### Implemented
 
-- Project structure
-- Architecture documentation
-- ADRs
-- Identity domain
-- User management foundation
+- Authentication
+- Organizations
+- Memberships
+- Projects
+- Tasks
+- Multi-tenancy foundation
+- Backend architecture
+- Frontend foundation
 - PostgreSQL integration
 - Docker development environment
-- Alembic migration setup
-- FastAPI application bootstrap
+- CI pipeline
 
 ### In Progress
 
-- Identity module
+- Knowledge Management (Documents)
+- AI Planning Workflows
 
 ### Planned
 
-- Organization management
-- Membership management
-- Authorization
-- Project management
-- Knowledge management
-- AI integration
-- Notifications
+- Goal Extraction
+- Roadmap Generation
+- Milestone Generation
+- Task Generation
+- Knowledge Search
+- Goal Alignment Analysis
 
 ---
 
-## Architecture
-
-### Architectural Style
-
-- Modular Monolith
-- Domain-Driven Design (DDD)
-- Hexagonal Architecture (Ports and Adapters)
-- CQRS
-
-### Architectural Decisions
-
-#### ADR-000
-
-Multi-Tenancy Strategy
-
-Shared Database
-
-Shared Schema
-
-Tenant isolation through organization ownership.
-
-#### ADR-001
-
-Domain-Driven Design
-
-Each domain owns its business rules, entities, use cases, and infrastructure.
-
-#### ADR-002
-
-Hexagonal Architecture
-
-Business logic remains independent from frameworks, databases, and external systems.
-
----
-
-## Domain Structure
-
-Current bounded contexts:
-
-- Identity
-- Workspace
-- Project
-- Knowledge
-- AI
-- Notification
-
-Current implementation focus:
-
-- Identity
-
----
-
-## Identity Domain
-
-## Responsibilities
-
-- User registration
-- Authentication
-- Organization management
-- Membership management
-- Authorization
-
-## Core Entities
-
-### User
-
-Represents a platform user.
-
-### Organization
-
-Represents a tenant.
-
-### Membership
-
-Represents a user's participation within an organization.
-
-## Roles
-
-- Owner
-- Admin
-- Member
-
----
-
-## Repository Structure
-
-```text
-workgraph/
-
-├── apps/
-│   ├── backend/
-│   └── frontend/
-│
-├── docs/
-│   ├── product/
-│   ├── architecture/
-│   │   ├── adr/
-│   │   └── domains/
-│   └── diagrams/
-│
-├── infrastructure/
-│
-├── tests/
-│
-├── .gitignore
-└── README.md
-```
-
----
-
-## Backend Structure
-
-```text
-apps/backend/
-
-├── src/
-│
-├── bootstrap/
-│
-├── config/
-│
-├── modules/
-│   └── identity/
-│
-├── migrations/
-│
-├── pyproject.toml
-└── README.md
-```
-
----
-
-## Development Stack
+## Tech Stack
 
 ### Backend
 
-- Python
+- Python 3.14+
 - FastAPI
 - SQLAlchemy
 - Alembic
@@ -192,8 +70,10 @@ apps/backend/
 
 ### Frontend
 
+- Next.js
 - React
 - TypeScript
+- Tailwind CSS
 
 ### Infrastructure
 
@@ -203,79 +83,57 @@ apps/backend/
 ### Development Tools
 
 - UV
-- Ruff
 - Pytest
+- Ruff
 - MyPy
 
 ---
 
-## Database
+## Architecture
 
-### Engine
+WorkGraph is built as a **Modular Monolith** following:
 
-PostgreSQL
+- Domain-Driven Design (DDD)
+- Hexagonal Architecture
+- CQRS
 
-### Migration Tool
-
-Alembic
-
-### Strategy
-
-Schema changes must be applied through migrations.
-
-Direct database modifications are not allowed.
+The architecture is designed to allow future extraction of domains into independent services when necessary.
 
 ---
 
 ## Documentation
 
-Project documentation is located in:
+Project documentation:
 
 ```text
-docs/
+docs/product
+docs/architecture
+docs/diagrams
 ```
-
-### Product
-
-Contains:
-
-- Vision
-- MVP definition
-- Roadmap
-
-### Architecture
-
-Contains:
-
-- Domain map
-- ADRs
-- Domain specifications
-- Architecture decisions
-
-### Diagrams
-
-Contains:
-
-- System diagrams
-- Domain diagrams
-- Context diagrams
 
 ---
 
-## Running the Project
+## Running Locally
 
 ### Prerequisites
 
-Install:
-
 - Python 3.14+
+- UV
 - Docker
 - Docker Compose
-- UV
+- Node.js
 
 ---
 
-### Start PostgreSQL
+### Start Infrastructure
+
+Navigate to backend:
+
+```bash
+cd apps/backend
+```
+
+Run Postgresql Container:
 
 ```bash
 docker compose up -d
@@ -283,39 +141,39 @@ docker compose up -d
 
 ---
 
-### Install Dependencies
+### Backend Setup
+
+Navigate to backend:
+
+```bash
+cd apps/backend
+```
+
+Install dependencies:
 
 ```bash
 uv sync
 ```
 
----
-
-### Apply Migrations
+Apply migrations:
 
 ```bash
 alembic upgrade head
 ```
 
----
-
-### Run Backend
+Run backend server:
 
 ```bash
 uv run uvicorn src.main:app --reload
 ```
 
----
-
-### Verify
-
-Application:
+Backend:
 
 ```text
 http://localhost:8000
 ```
 
-API Documentation:
+API Docs:
 
 ```text
 http://localhost:8000/docs
@@ -323,59 +181,99 @@ http://localhost:8000/docs
 
 ---
 
-## Roadmap
+### Frontend Setup
 
-### Phase 1
+Navigate to frontend:
 
-Identity
+```bash
+cd apps/frontend
+```
 
-- Users
-- Organizations
-- Memberships
-- Authentication
+Install dependencies:
 
-### Phase 2
+```bash
+npm install
+```
 
-Project Management
+Run dev server:
 
-- Projects
-- Sprints
-- Tasks
+```bash
+npm run dev
+```
 
-### Phase 3
+Frontend:
 
-Knowledge Management
-
-- Documents
-- Pages
-- Search
-
-### Phase 4
-
-AI
-
-- RAG
-- Semantic Search
-- Assistant
-
-### Phase 5
-
-Platform
-
-- Notifications
-- Analytics
-- Audit Logs
+```text
+http://localhost:3000
+```
 
 ---
 
-## Long-Term Goal
+## Database Migrations (Alembic)
 
-Build a production-grade SaaS platform demonstrating:
+WorkGraph uses module-based migrations.
 
-- Software Architecture
-- Domain Modeling
-- Distributed Systems Readiness
-- Modern Python Engineering Practices
-- Full-Stack Development Skills
+Each bounded context manages its own migration lifecycle.
 
-Suitable as a senior-level portfolio project.
+### Initialize migrations for a module
+
+```bash
+cd src/modules/{module_name}/infrastructure/
+alembic init migrations
+```
+
+### Create a new migration
+
+Run from backend root:
+
+```bash
+uv run alembic \
+  -c src/modules/{module_name}/infrastructure/persistence/alembic.ini \
+  revision --autogenerate \
+  -m "create new migrations"
+```
+
+### Apply migrations
+
+```bash
+uv run alembic \
+  -c src/modules/{module_name}/infrastructure/persistence/alembic.ini \
+  upgrade head
+```
+
+---
+
+## Running Tests
+
+From backend directory:
+
+```bash
+cd apps/backend
+uv run pytest --cov
+```
+
+---
+
+## Why WorkGraph?
+
+Most teams struggle with fragmented tools.
+
+- Tasks live in one place
+- Documents in another
+- Decisions in chats
+- Planning in separate systems
+
+WorkGraph connects all of these into one graph where knowledge becomes execution.
+
+---
+
+## Project Status
+
+WorkGraph is evolving toward a goal-driven workflow where AI transforms organizational knowledge into:
+
+- Goals
+- Roadmaps
+- Milestones
+- Tasks
+
+See `docs/product/v2` for the latest direction.
