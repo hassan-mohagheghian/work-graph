@@ -124,3 +124,6 @@ docker-compose.override.yml
 
 # Optional: JetBrains IDEs
 *.iml
+
+# Uploaded files
+uploads/

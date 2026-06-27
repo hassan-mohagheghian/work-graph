@@ -8,13 +8,14 @@ from src.modules.identity.infrastructure.persistence.models import Base as Ident
 from src.modules.identity.infrastructure.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
+from src.modules.knowledge.infrastructure.persistence.models import Base as KnowledgeBase
 from src.modules.organization.infrastructure.persistence.models import Base as OrgBase
 from src.modules.project.infrastructure.persistence.models import Base as ProjectBase
 from src.modules.task.infrastructure.persistence.models import Base as TaskBase
 
 DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/workgraph_test"
 ADMIN_DB_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
-SCHEMAS = ["identity", "org", "project", "task"]
+SCHEMAS = ["identity", "org", "project", "task", "knowledge"]
 
 
 async def ensure_test_db():
@@ -61,6 +62,7 @@ async def engine():
         await conn.run_sync(OrgBase.metadata.create_all)
         await conn.run_sync(ProjectBase.metadata.create_all)
         await conn.run_sync(TaskBase.metadata.create_all)
+        await conn.run_sync(KnowledgeBase.metadata.create_all)
 
     yield engine
 
