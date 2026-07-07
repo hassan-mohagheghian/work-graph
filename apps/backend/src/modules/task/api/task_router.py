@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
+
 from src.modules.project.api.project_router import get_project_repo
 from src.modules.task.api.mappers.task_list_mapper import TaskListResponseMapper
 from src.modules.task.application.commands.create_task.command import CreateTaskCommand
@@ -39,6 +40,7 @@ class CreateTaskRequest(BaseModel):
     project_id: UUID
     title: str
     description: str | None = None
+    milestone_id: UUID | None = None
 
 
 @router.post("")
@@ -55,6 +57,7 @@ async def create_task(
             project_id=body.project_id,
             title=body.title,
             description=body.description,
+            milestone_id=body.milestone_id,
         )
     )
 
@@ -67,13 +70,14 @@ async def list_tasks_by_project(
 ):
     handler = ListTasksHandler(task_repo)
 
-    return await handler.handle(ListTasksQuery(project_id=project_id))
+    return await handler.handle(ListTasksQuery(project_id=project_id, org_id=org_id))
 
 
 class UpdateTaskRequest(BaseModel):
     title: str | None = None
     description: str | None = None
     status: TaskStatus | None = None
+    milestone_id: UUID | None = None
 
 
 @router.patch("/{task_id}")
@@ -101,6 +105,7 @@ async def update_task(
             title=body.title,
             description=body.description,
             status=body.status,
+            milestone_id=body.milestone_id,
         )
     )
 

@@ -5,7 +5,7 @@ export function useUpdateTask(orgId?: string | null) {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ taskId, data }: any) => updateTask(orgId, taskId, data),
+    mutationFn: ({ taskId, data }: any) => updateTask(orgId!, taskId, data),
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tasks", orgId] });

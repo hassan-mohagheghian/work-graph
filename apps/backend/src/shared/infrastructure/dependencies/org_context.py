@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, Query, status
+
 from src.modules.organization.domain.repositories.org_membership_repo import (
     OrgMembershipRepo,
 )
@@ -39,4 +40,4 @@ async def get_current_org_id_v1(
             detail="Not Allowed",
         )
 
-    return org_id
+    return UUID(org_id)

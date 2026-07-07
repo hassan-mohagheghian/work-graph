@@ -18,3 +18,4 @@ class TaskModel(IDMixin, TimestampedMixin, Base):
         SAEnum(TaskStatus, name="task_status"), default=TaskStatus.todo, nullable=False
     )
     assignee_id = Column(PG_UUID(as_uuid=True), nullable=True)
+    milestone_id = Column(PG_UUID(as_uuid=True), nullable=True)

@@ -10,3 +10,9 @@ export async function getOrganizations(): Promise<Organization[]> {
 
   return res.data;
 }
+
+export async function getOrganization(orgId: string): Promise<Organization> {
+  const res = await api.get(`/organizations/${orgId}`);
+
+  return res.data;
+}

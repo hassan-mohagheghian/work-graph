@@ -11,6 +11,7 @@ class TaskResponse:
     title: str
     description: str | None
     status: str
+    milestone_id: UUID | None
     created_at: datetime
 
 

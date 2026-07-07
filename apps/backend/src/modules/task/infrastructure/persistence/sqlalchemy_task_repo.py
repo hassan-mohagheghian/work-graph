@@ -20,6 +20,7 @@ class SqlAlchemyTaskRepo(TaskRepo):
                 title=task.title,
                 description=task.description,
                 status=task.status.value,
+                milestone_id=task.milestone_id,
                 created_at=task.created_at,
             )
         )
@@ -42,6 +43,7 @@ class SqlAlchemyTaskRepo(TaskRepo):
         model.title = task.title
         model.description = task.description
         model.status = task.status
+        model.milestone_id = task.milestone_id
 
         await self.session.commit()
 
@@ -59,6 +61,7 @@ class SqlAlchemyTaskRepo(TaskRepo):
             title=task.title,
             description=task.description,
             status=task.status,
+            milestone_id=task.milestone_id,
             created_at=task.created_at,
             id=task.id,
         )
@@ -78,6 +81,7 @@ class SqlAlchemyTaskRepo(TaskRepo):
                 title=r.title,
                 description=r.description,
                 status=r.status,
+                milestone_id=r.milestone_id,
                 created_at=r.created_at,
             )
             for r in rows
@@ -105,6 +109,7 @@ class SqlAlchemyTaskRepo(TaskRepo):
                 title=row.title,
                 description=row.description,
                 status=row.status,
+                milestone_id=row.milestone_id,
                 created_at=row.created_at,
                 updated_at=row.updated_at,
                 id=row.id,

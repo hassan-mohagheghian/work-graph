@@ -8,3 +8,4 @@ class CreateTaskCommand:
     project_id: UUID
     title: str
     description: str | None = None
+    milestone_id: UUID | None = None

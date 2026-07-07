@@ -7,5 +7,6 @@ export interface Task {
   title: string;
   description?: string;
   status: TaskStatus;
+  milestone_id?: string | null;
   created_at: string;
 }

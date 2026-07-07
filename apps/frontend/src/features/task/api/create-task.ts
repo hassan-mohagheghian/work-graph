@@ -5,6 +5,7 @@ export async function createTask(data: {
   project_id: string;
   title: string;
   description?: string;
+  milestone_id?: string;
 }) {
   const res = await api.post(`/tasks?org_id=${data.org_id}`, data);
   return res.data;

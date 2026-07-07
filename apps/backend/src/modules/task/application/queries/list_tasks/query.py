@@ -6,6 +6,6 @@ from uuid import UUID
 class ListTasksQuery:
     org_id: UUID
     project_id: UUID
-    status: str | None
+    status: str | None = None
     limit: int = 10
     offset: int = 0

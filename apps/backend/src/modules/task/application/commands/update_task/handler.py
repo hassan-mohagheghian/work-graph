@@ -48,6 +48,9 @@ class UpdateTaskHandler:
             except InvalidTaskTransitionError as e:
                 raise HTTPException(status_code=400, detail=str(e))
 
+        if cmd.milestone_id is not None:
+            task.milestone_id = cmd.milestone_id
+
         await self.task_repo.update(task)
 
         return task

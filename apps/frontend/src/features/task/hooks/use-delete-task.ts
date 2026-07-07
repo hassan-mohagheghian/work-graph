@@ -5,7 +5,7 @@ export function useDeleteTask(orgId?: string | null) {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (taskId: any) => deleteTask(orgId, taskId),
+    mutationFn: (taskId: any) => deleteTask(orgId!, taskId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tasks", orgId] });
     },

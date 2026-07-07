@@ -13,3 +13,4 @@ class UpdateTaskCommand:
     title: Optional[str] = None
     description: Optional[str] = None
     status: Optional[TaskStatus] = None
+    milestone_id: Optional[UUID] = None

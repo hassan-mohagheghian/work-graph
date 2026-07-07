@@ -15,6 +15,7 @@ class TaskResponseMapper:
             title=task.title,
             description=task.description,
             status=task.status,
+            milestone_id=task.milestone_id,
             created_at=task.created_at,
         )
 

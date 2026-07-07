@@ -15,6 +15,7 @@ class Task(Entity, TimestampedMixin):
     status: TaskStatus = TaskStatus.todo
     creator_id: UUID | None = None
     assignee_id: UUID | None = None
+    milestone_id: UUID | None = None
 
     def change_status(self, new_status: TaskStatus) -> None:
         """
