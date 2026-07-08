@@ -2,8 +2,8 @@ from fastapi import HTTPException
 from src.modules.planning.application.commands.activate_roadmap.command import (
     ActivateRoadmapCommand,
 )
-from src.modules.planning.domain.exceptions import InvalidRoadmapTransitionError
 from src.modules.planning.domain.repos.roadmap_repo import RoadmapRepo
+from src.modules.planning.domain.value_objects.roadmap_status import RoadmapStatus
 
 
 class ActivateRoadmapHandler:
@@ -19,10 +19,7 @@ class ActivateRoadmapHandler:
         if roadmap.org_id != cmd.org_id:
             raise HTTPException(status_code=403, detail="Not allowed")
 
-        try:
-            roadmap.activate()
-        except InvalidRoadmapTransitionError as e:
-            raise HTTPException(status_code=400, detail=str(e))
+        roadmap.change_status(RoadmapStatus.active)
 
         await self.roadmap_repo.update(roadmap)
         return roadmap

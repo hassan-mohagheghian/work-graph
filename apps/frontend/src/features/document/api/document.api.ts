@@ -76,5 +76,5 @@ export function getAttachmentDownloadUrl(
   documentId: string,
   attachmentId: string,
 ): string {
-  return `http://localhost:8000/documents/${documentId}/attachments/${attachmentId}/download?org_id=${orgId}`;
+  return `${api.defaults.baseURL}/documents/${documentId}/attachments/${attachmentId}/download?org_id=${orgId}`;
 }

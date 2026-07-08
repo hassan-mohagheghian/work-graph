@@ -35,3 +35,7 @@ class TaskRepo(ABC):
         offset: int | None = 0,
     ):
         pass
+
+    @abstractmethod
+    async def reorder(self, project_id: UUID, ordered_ids: list[UUID]) -> None:
+        pass

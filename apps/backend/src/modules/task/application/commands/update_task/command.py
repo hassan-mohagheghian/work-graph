@@ -1,8 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 from uuid import UUID
 
 from src.modules.task.domain.value_objects.task_status import TaskStatus
+
+_UNSET = object()
 
 
 @dataclass
@@ -13,4 +15,4 @@ class UpdateTaskCommand:
     title: Optional[str] = None
     description: Optional[str] = None
     status: Optional[TaskStatus] = None
-    milestone_id: Optional[UUID] = None
+    milestone_id: Optional[UUID] = field(default=_UNSET)

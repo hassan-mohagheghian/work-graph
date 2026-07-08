@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useCreateRoadmap } from "../hooks/use-create-roadmap";
+import { useUpdateProject } from "../hooks/use-update-project";
 import { useOrg } from "@/shared/context/org-context";
 
 import { Button } from "@/shared/ui/button";
@@ -16,39 +16,40 @@ import {
   SheetFooter,
 } from "@/shared/ui/sheet";
 
-interface CreateRoadmapSheetProps {
-  projectId: string;
+interface EditProjectSheetProps {
+  project: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function CreateRoadmapSheet({
-  projectId,
+export function EditProjectSheet({
+  project,
   open,
   onOpenChange,
-}: CreateRoadmapSheetProps) {
+}: EditProjectSheetProps) {
   const { orgId } = useOrg();
-  const mutation = useCreateRoadmap(orgId);
+  const updateProject = useUpdateProject(orgId);
 
-  const [title, setTitle] = useState("");
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    if (open) {
-      setTitle("");
-      setDescription("");
+    if (project && open) {
+      setName(project.name);
+      setDescription(project.description || "");
     }
-  }, [open]);
+  }, [project, open]);
 
-  function handleCreate() {
-    if (!orgId || !title.trim()) return;
+  function handleSave() {
+    if (!name.trim()) return;
 
-    mutation.mutate(
+    updateProject.mutate(
       {
-        org_id: orgId,
-        project_id: projectId,
-        title,
-        description: description || undefined,
+        projectId: project.id,
+        data: {
+          name,
+          description: description || null,
+        },
       },
       {
         onSuccess: () => {
@@ -60,32 +61,32 @@ export function CreateRoadmapSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[50vh]">
+      <SheetContent side="bottom" className="h-[60vh]">
         <SheetHeader>
-          <SheetTitle>Create Roadmap</SheetTitle>
-          <SheetDescription>Add a new roadmap to this project.</SheetDescription>
+          <SheetTitle>Edit Project</SheetTitle>
+          <SheetDescription>
+            Update the project name and description.
+          </SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-4 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="roadmap-title">Title</Label>
+            <Label htmlFor="project-name">Name</Label>
             <Input
-              id="roadmap-title"
-              placeholder="Roadmap title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              autoFocus
+              id="project-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="roadmap-description">Description</Label>
+            <Label htmlFor="project-description">Description</Label>
             <textarea
-              id="roadmap-description"
-              className="w-full border rounded-md p-2 text-sm min-h-[60px]"
-              placeholder="Description (optional)"
+              id="project-description"
+              className="w-full border rounded-md p-2 text-sm min-h-[80px]"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              placeholder="Project description"
             />
           </div>
         </div>
@@ -94,8 +95,8 @@ export function CreateRoadmapSheet({
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button size="sm" onClick={handleCreate} disabled={mutation.isPending}>
-            {mutation.isPending ? "Creating..." : "Create"}
+          <Button size="sm" onClick={handleSave} disabled={updateProject.isPending}>
+            {updateProject.isPending ? "Saving..." : "Save"}
           </Button>
         </SheetFooter>
       </SheetContent>

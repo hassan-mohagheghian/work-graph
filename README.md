@@ -30,29 +30,31 @@ WorkGraph is under active development.
 
 ### Implemented
 
-- Authentication
-- Organizations
-- Memberships
-- Projects
-- Tasks
-- Multi-tenancy foundation
-- Backend architecture
-- Frontend foundation
-- PostgreSQL integration
+- Authentication (signup, login, sessions)
+- Organizations with membership management
+- Projects with CRUD, member roles, and overview dashboard
+- Roadmaps with status lifecycle (draft → active → completed → archived)
+- Milestones with drag-and-drop reordering
+- Tasks with Kanban board (drag-and-drop between To Do / In Progress / Done)
+- Documents with file attachment management
+- Multi-tenancy with org-level access control
+- Role-based access control (Owner, Admin, Member)
+- Backend: Modular monolith with DDD, CQRS, Hexagonal Architecture
+- Frontend: Next.js App Router with React Query, Tailwind CSS, @dnd-kit
+- PostgreSQL with per-module Alembic migrations
 - Docker development environment
 - CI pipeline
 
 ### In Progress
 
-- Knowledge Management (Documents)
 - AI Planning Workflows
+- Knowledge-based task generation
 
 ### Planned
 
 - Goal Extraction
 - Roadmap Generation
 - Milestone Generation
-- Task Generation
 - Knowledge Search
 - Goal Alignment Analysis
 
@@ -64,16 +66,18 @@ WorkGraph is under active development.
 
 - Python 3.14+
 - FastAPI
-- SQLAlchemy
+- SQLAlchemy (async)
 - Alembic
 - PostgreSQL
 
 ### Frontend
 
-- Next.js
-- React
+- Next.js 16 (App Router)
+- React 19
 - TypeScript
 - Tailwind CSS
+- @dnd-kit (drag and drop)
+- React Query
 
 ### Infrastructure
 
@@ -94,10 +98,22 @@ WorkGraph is under active development.
 WorkGraph is built as a **Modular Monolith** following:
 
 - Domain-Driven Design (DDD)
-- Hexagonal Architecture
-- CQRS
+- Hexagonal Architecture (Ports & Adapters)
+- CQRS (Command Query Responsibility Segregation)
 
 The architecture is designed to allow future extraction of domains into independent services when necessary.
+
+### Modules
+
+```text
+apps/backend/src/modules/
+  ├── identity/      # Auth, users, sessions
+  ├── organization/  # Orgs, memberships, RBAC
+  ├── project/       # Projects, project members
+  ├── planning/      # Roadmaps, milestones
+  ├── task/          # Tasks, status management
+  └── knowledge/     # Documents, attachments
+```
 
 ---
 
@@ -264,16 +280,3 @@ Most teams struggle with fragmented tools.
 - Planning in separate systems
 
 WorkGraph connects all of these into one graph where knowledge becomes execution.
-
----
-
-## Project Status
-
-WorkGraph is evolving toward a goal-driven workflow where AI transforms organizational knowledge into:
-
-- Goals
-- Roadmaps
-- Milestones
-- Tasks
-
-See `docs/product/v2` for the latest direction.

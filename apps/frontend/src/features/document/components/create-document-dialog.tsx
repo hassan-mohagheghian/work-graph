@@ -1,88 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCreateDocument } from "../hooks/use-create-document";
 import { useOrg } from "@/shared/context/org-context";
 
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-
+import { Label } from "@/shared/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/shared/ui/sheet";
 
-interface CreateDocumentDialogProps {
-  projectId?: string;
+interface CreateDocumentSheetProps {
+  projectId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function CreateDocumentDialog({ projectId }: CreateDocumentDialogProps) {
+export function CreateDocumentSheet({
+  projectId,
+  open,
+  onOpenChange,
+}: CreateDocumentSheetProps) {
   const { orgId } = useOrg();
   const mutation = useCreateDocument(orgId);
 
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setTitle("");
+      setDescription("");
+    }
+  }, [open]);
 
   function handleCreate() {
     if (!orgId || !title.trim()) return;
 
-    const links = projectId
-      ? [{ target_type: "project" as const, target_id: projectId }]
-      : [];
-
-    if (links.length === 0) return;
-
-    mutation.mutate({
-      org_id: orgId,
-      title,
-      description: description || undefined,
-      links,
-    });
-
-    setTitle("");
-    setDescription("");
-    setOpen(false);
+    mutation.mutate(
+      {
+        org_id: orgId,
+        title,
+        description: description || undefined,
+        links: [{ target_type: "project", target_id: projectId }],
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+      }
+    );
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>+ Create Document</Button>
-      </DialogTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="h-[60vh]">
+        <SheetHeader>
+          <SheetTitle>Create Document</SheetTitle>
+          <SheetDescription>
+            Add a document to capture requirements and knowledge.
+          </SheetDescription>
+        </SheetHeader>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create Document</DialogTitle>
-        </DialogHeader>
+        <div className="flex-1 overflow-y-auto px-4 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="doc-title">Title</Label>
+            <Input
+              id="doc-title"
+              placeholder="Document title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+            />
+          </div>
 
-        <div className="space-y-4">
-          <Input
-            placeholder="Document title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <textarea
-            className="w-full border rounded-md p-2 text-sm min-h-[100px]"
-            placeholder="Description (requirements, notes, goals...)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreate} disabled={mutation.isPending}>
-              {mutation.isPending ? "Creating..." : "Create"}
-            </Button>
+          <div className="space-y-2">
+            <Label htmlFor="doc-description">Description</Label>
+            <textarea
+              id="doc-description"
+              className="w-full border rounded-md p-2 text-sm min-h-[100px]"
+              placeholder="Requirements, notes, goals..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <SheetFooter>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleCreate} disabled={mutation.isPending}>
+            {mutation.isPending ? "Creating..." : "Create"}
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

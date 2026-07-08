@@ -2,7 +2,6 @@ from fastapi import HTTPException
 from src.modules.planning.application.commands.update_milestone.command import (
     UpdateMilestoneCommand,
 )
-from src.modules.planning.domain.exceptions import InvalidMilestoneTransitionError
 from src.modules.planning.domain.repos.milestone_repo import MilestoneRepo
 
 
@@ -29,10 +28,7 @@ class UpdateMilestoneHandler:
             milestone.order = cmd.order
 
         if cmd.status is not None:
-            try:
-                milestone.change_status(cmd.status)
-            except InvalidMilestoneTransitionError as e:
-                raise HTTPException(status_code=400, detail=str(e))
+            milestone.change_status(cmd.status)
 
         await self.milestone_repo.update(milestone)
         return milestone

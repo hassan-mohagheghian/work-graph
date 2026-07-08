@@ -2,7 +2,6 @@ from fastapi import HTTPException
 from src.modules.planning.application.commands.update_roadmap.command import (
     UpdateRoadmapCommand,
 )
-from src.modules.planning.domain.exceptions import InvalidRoadmapTransitionError
 from src.modules.planning.domain.repos.roadmap_repo import RoadmapRepo
 
 
@@ -26,10 +25,7 @@ class UpdateRoadmapHandler:
             roadmap.description = cmd.description
 
         if cmd.status is not None:
-            try:
-                roadmap.change_status(cmd.status)
-            except InvalidRoadmapTransitionError as e:
-                raise HTTPException(status_code=400, detail=str(e))
+            roadmap.change_status(cmd.status)
 
         await self.roadmap_repo.update(roadmap)
         return roadmap

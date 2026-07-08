@@ -1,77 +1,104 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCreateMilestone } from "../hooks/use-create-milestone";
 import { useOrg } from "@/shared/context/org-context";
 
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-
+import { Label } from "@/shared/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/shared/ui/sheet";
 
-export function CreateMilestoneDialog({ roadmapId }: { roadmapId: string }) {
+interface CreateMilestoneSheetProps {
+  roadmapId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function CreateMilestoneSheet({
+  roadmapId,
+  open,
+  onOpenChange,
+}: CreateMilestoneSheetProps) {
   const { orgId } = useOrg();
   const mutation = useCreateMilestone(orgId);
 
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setTitle("");
+      setDescription("");
+    }
+  }, [open]);
 
   function handleCreate() {
     if (!orgId || !title.trim()) return;
 
-    mutation.mutate({
-      org_id: orgId,
-      roadmap_id: roadmapId,
-      title,
-      description: description || undefined,
-    });
-
-    setTitle("");
-    setDescription("");
-    setOpen(false);
+    mutation.mutate(
+      {
+        org_id: orgId,
+        roadmap_id: roadmapId,
+        title,
+        description: description || undefined,
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+      }
+    );
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>+ Add Milestone</Button>
-      </DialogTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="h-[50vh]">
+        <SheetHeader>
+          <SheetTitle>Add Milestone</SheetTitle>
+          <SheetDescription>Add a milestone to this roadmap.</SheetDescription>
+        </SheetHeader>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add Milestone</DialogTitle>
-        </DialogHeader>
+        <div className="flex-1 overflow-y-auto px-4 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="milestone-title">Title</Label>
+            <Input
+              id="milestone-title"
+              placeholder="Milestone title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+            />
+          </div>
 
-        <div className="space-y-4">
-          <Input
-            placeholder="Milestone title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <Input
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreate} disabled={mutation.isPending}>
-              {mutation.isPending ? "Creating..." : "Create"}
-            </Button>
+          <div className="space-y-2">
+            <Label htmlFor="milestone-description">Description</Label>
+            <textarea
+              id="milestone-description"
+              className="w-full border rounded-md p-2 text-sm min-h-[60px]"
+              placeholder="Description (optional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <SheetFooter>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleCreate} disabled={mutation.isPending}>
+            {mutation.isPending ? "Creating..." : "Create"}
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

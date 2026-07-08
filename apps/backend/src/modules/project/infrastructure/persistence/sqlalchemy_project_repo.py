@@ -52,3 +52,15 @@ class SqlAlchemyProjectRepo(ProjectRepository):
             )
             for row in rows
         ]
+
+    async def update(self, project: Project) -> None:
+        result = await self.session.execute(
+            select(ProjectModel).where(ProjectModel.id == project.id)
+        )
+        model = result.scalar_one_or_none()
+        if not model:
+            raise ValueError("Project not found")
+
+        model.name = project.name
+        model.description = project.description
+        await self.session.commit()

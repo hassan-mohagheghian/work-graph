@@ -16,6 +16,12 @@ from src.modules.project.application.commands.create_project.command import (
 from src.modules.project.application.commands.create_project.handler import (
     CreateProjectHandler,
 )
+from src.modules.project.application.commands.update_project.command import (
+    UpdateProjectCommand,
+)
+from src.modules.project.application.commands.update_project.handler import (
+    UpdateProjectHandler,
+)
 from src.modules.project.application.commands.remove_project_member.command import (
     RemoveProjectMemberCommand,
 )
@@ -62,11 +68,11 @@ class CreateProjectRequest(BaseModel):
     description: str | None = None
 
 
-@router.post("")
+@router.post("/org/{org_id}")
 async def create_project(
     body: CreateProjectRequest,
     project_repo=Depends(get_project_repo),
-    org_id=Depends(get_current_org_id),
+    org_id: UUID = Depends(get_current_org_id),
 ):
     handler = CreateProjectHandler(project_repo)
 
@@ -87,11 +93,39 @@ async def create_project(
 @router.get("/org/{org_id}")
 async def list_projects(
     project_repo=Depends(get_project_repo),
-    org_id=Depends(get_current_org_id),
+    org_id: UUID = Depends(get_current_org_id),
 ):
     handler = ListProjectsHandler(project_repo)
 
     return await handler.handle(ListProjectsQuery(org_id=org_id))
+
+
+class UpdateProjectRequest(BaseModel):
+    name: str | None = None
+    description: str | None = None
+
+
+@router.patch("/{project_id}")
+async def update_project(
+    project_id: UUID,
+    body: UpdateProjectRequest,
+    project_repo=Depends(get_project_repo),
+    org_id: UUID = Depends(get_current_org_id),
+):
+    handler = UpdateProjectHandler(project_repo)
+    project = await handler.handle(
+        UpdateProjectCommand(
+            project_id=project_id,
+            org_id=org_id,
+            name=body.name,
+            description=body.description,
+        )
+    )
+    return {
+        "id": str(project.id),
+        "name": project.name,
+        "description": project.description,
+    }
 
 
 @router.get("/{project_id}/members")

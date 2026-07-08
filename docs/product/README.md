@@ -18,3 +18,10 @@ Goal-driven evolution of WorkGraph focused on:
 - Goal Alignment
 
 Current active product direction: v2
+
+Key v2 planning docs:
+
+- [MVP](v2/001-mvp.md)
+- [Roadmap](v2/002-roadmap.md)
+- [30 Day Challenge Plan](v2/004-30-day-challenge-plan.md)
+- [Next Phases: AI Planning](v2/005-next-phases-ai-planning.md)

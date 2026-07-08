@@ -1,20 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 import { useOrg } from "@/shared/context/org-context";
 import { useDocuments } from "@/features/document/hooks/use-documents";
-import { useUpdateDocument } from "@/features/document/hooks/use-update-document";
-import { useDeleteDocument } from "@/features/document/hooks/use-delete-document";
 import { useUploadAttachment } from "@/features/document/hooks/use-upload-attachment";
-import { CreateDocumentDialog } from "@/features/document/components/create-document-dialog";
-import { getAttachmentDownloadUrl } from "@/features/document/api/document.api";
-import type { Document } from "@/features/document/types/document";
+import { CreateDocumentSheet } from "@/features/document/components/create-document-dialog";
+import { EditDocumentSheet } from "@/features/document/components/edit-document-sheet";
 
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
+import { Paperclip, Plus } from "lucide-react";
 
 export default function ProjectDocumentsPage() {
   const params = useParams();
@@ -32,17 +29,19 @@ export default function ProjectDocumentsPage() {
     target_id: projectId,
   });
 
-  const updateDocument = useUpdateDocument(orgId);
-  const deleteDocument = useDeleteDocument(orgId);
-  const uploadAttachment = useUploadAttachment(orgId);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editDocId, setEditDocId] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
-  const [edit, setEdit] = useState<Record<string, Document>>({});
-  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+  function handleOpenDoc(docId: string) {
+    setEditDocId(docId);
+    setEditOpen(true);
+  }
 
   if (isLoading) return <p>Loading documents...</p>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold">Documents</h1>
@@ -50,108 +49,71 @@ export default function ProjectDocumentsPage() {
             Store project knowledge for AI planning
           </p>
         </div>
-        <CreateDocumentDialog projectId={projectId} />
+        <Button size="sm" onClick={() => setCreateOpen(true)}>
+          <Plus className="size-4 mr-1" />
+          Create Document
+        </Button>
       </div>
 
       {documents.length === 0 && (
         <Card>
-          <CardContent className="p-6 text-muted-foreground">
-            No documents yet. Create one to capture requirements and attachments.
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground mb-4">
+              No documents yet. Create one to capture requirements and attachments.
+            </p>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="size-4 mr-1" />
+              Create Document
+            </Button>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-3">
-        {documents.map((doc) => {
-          const local = edit[doc.id] ?? doc;
-
-          function patchDocument(patch: Partial<Document>) {
-            const updated = { ...local, ...patch };
-            setEdit((prev) => ({ ...prev, [doc.id]: updated }));
-            updateDocument.mutate({
-              documentId: doc.id,
-              data: {
-                title: patch.title,
-                description: patch.description,
-              },
-            });
-          }
-
-          return (
-            <Card key={doc.id}>
-              <CardContent className="p-4 space-y-3">
-                <Input
-                  value={local.title}
-                  onChange={(e) => patchDocument({ title: e.target.value })}
-                />
-
-                <textarea
-                  className="w-full border rounded-md p-2 text-sm min-h-[80px]"
-                  value={local.description || ""}
-                  placeholder="Description"
-                  onChange={(e) => patchDocument({ description: e.target.value })}
-                />
-
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Attachments</p>
-                  {doc.attachments.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No files attached</p>
-                  )}
-                  <ul className="space-y-1">
-                    {doc.attachments.map((att) => (
-                      <li key={att.id} className="text-sm">
-                        <a
-                          href={getAttachmentDownloadUrl(orgId, doc.id, att.id)}
-                          className="text-blue-600 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {att.filename}
-                        </a>
-                        <span className="text-muted-foreground ml-2">
-                          ({Math.round(att.size_bytes / 1024)} KB)
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <input
-                    type="file"
-                    ref={(el) => {
-                      fileInputs.current[doc.id] = el;
-                    }}
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        uploadAttachment.mutate({ documentId: doc.id, file });
-                        e.target.value = "";
-                      }
-                    }}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputs.current[doc.id]?.click()}
-                  >
-                    Upload file
-                  </Button>
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => deleteDocument.mutate(doc.id)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {documents.map((doc) => (
+          <Card
+            key={doc.id}
+            className="group cursor-pointer hover:shadow-md transition"
+            onClick={() => handleOpenDoc(doc.id)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h3 className="font-medium truncate">{doc.title}</h3>
+                {doc.attachments.length > 0 && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full shrink-0">
+                    <Paperclip className="size-3" />
+                    {doc.attachments.length}
+                  </span>
+                )}
+              </div>
+              {doc.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {doc.description}
+                </p>
+              )}
+              {!doc.description && (
+                <p className="text-sm text-muted-foreground italic">
+                  No description
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
       </div>
+
+      <CreateDocumentSheet
+        projectId={projectId}
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+      />
+
+      {editDocId && (
+        <EditDocumentSheet
+          documentId={editDocId}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+        />
+      )}
     </div>
   );
 }

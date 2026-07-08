@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { useTasksByProject } from "@/features/task/hooks/use-tasks-by-project";
 import { useUpdateTask } from "@/features/task/hooks/use-update-task";
 import { AddTaskToMilestoneDialog } from "@/features/task/components/add-task-to-milestone-dialog";
 import { AssignTaskToMilestoneDialog } from "@/features/task/components/assign-task-to-milestone-dialog";
-import { ROUTES } from "@/shared/routes";
+import { EditTaskSheet } from "@/features/task/components/edit-task-sheet";
 import type { Task } from "@/features/task/types/task";
 import { CheckCircle2, Circle, Clock, X } from "lucide-react";
 import { Button } from "@/shared/ui/button";
@@ -23,6 +23,8 @@ export function MilestoneTaskList({
 }) {
   const { data: tasks = [], isLoading } = useTasksByProject(orgId, projectId);
   const updateTask = useUpdateTask(orgId);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -43,7 +45,6 @@ export function MilestoneTaskList({
 
   return (
     <div className="space-y-2">
-      {/* Milestone tasks */}
       {milestoneTasks.length > 0 && (
         <ul className="space-y-1">
           {milestoneTasks.map((task: Task) => {
@@ -63,13 +64,16 @@ export function MilestoneTaskList({
 
             return (
               <li key={task.id} className="flex items-center group">
-                <Link
-                  href={ROUTES.TASK_DETAIL(orgId, projectId, task.id)}
-                  className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-muted transition flex-1 min-w-0"
+                <button
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setSheetOpen(true);
+                  }}
+                  className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-muted transition flex-1 min-w-0 text-left"
                 >
                   <StatusIcon className={`size-4 shrink-0 ${statusColor}`} />
                   <span className="truncate">{task.title}</span>
-                </Link>
+                </button>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -91,7 +95,6 @@ export function MilestoneTaskList({
         </p>
       )}
 
-      {/* Action buttons */}
       <div className="flex items-center gap-1 pt-1">
         <AddTaskToMilestoneDialog
           projectId={projectId}
@@ -103,6 +106,15 @@ export function MilestoneTaskList({
           milestoneName={milestoneTitle}
         />
       </div>
+
+      {selectedTask && (
+        <EditTaskSheet
+          task={selectedTask}
+          projectId={projectId}
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+        />
+      )}
     </div>
   );
 }

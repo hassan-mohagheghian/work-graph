@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useCreateTask } from "../hooks/use-create-task";
 import { useOrg } from "@/shared/context/org-context";
-import { useProjects } from "@/features/project/hooks/use-projects";
+import { useRoadmaps } from "@/features/planning/roadmap/hooks/use-roadmaps";
+import { useMilestones } from "@/features/planning/milestone/hooks/use-milestones";
 
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -16,32 +17,48 @@ import {
   DialogTrigger,
 } from "@/shared/ui/dialog";
 
-export function CreateTaskDialog() {
+interface CreateTaskDialogProps {
+  projectId: string;
+}
+
+export function CreateTaskDialog({ projectId }: CreateTaskDialogProps) {
   const { orgId } = useOrg();
   const mutation = useCreateTask(orgId);
 
-  const { data: projects = [] } = useProjects(orgId);
+  const { data: roadmaps = [] } = useRoadmaps(orgId, projectId);
+  const [roadmapId, setRoadmapId] = useState("");
+  const { data: milestones = [] } = useMilestones(orgId, roadmapId || undefined);
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState("");
+  const [milestoneId, setMilestoneId] = useState("");
 
   function handleCreate() {
-    if (!orgId || !projectId || !title.trim()) return;
+    if (!orgId || !title.trim()) return;
 
     mutation.mutate({
       org_id: orgId,
       project_id: projectId,
       title,
+      milestone_id: milestoneId || undefined,
     });
 
     setTitle("");
-    setProjectId("");
+    setRoadmapId("");
+    setMilestoneId("");
     setOpen(false);
   }
 
+  function handleOpenChange(value: boolean) {
+    setOpen(value);
+    if (!value) {
+      setRoadmapId("");
+      setMilestoneId("");
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>+ Create Task</Button>
       </DialogTrigger>
@@ -52,29 +69,47 @@ export function CreateTaskDialog() {
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* TITLE */}
           <Input
             placeholder="Task title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
 
-          {/* PROJECT SELECT */}
-          <select
-            className="w-full border rounded p-2"
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-          >
-            <option value="">Select project</option>
+          {/* ROADMAP SELECT (optional) */}
+          {roadmaps.length > 0 && (
+            <select
+              className="w-full border rounded p-2"
+              value={roadmapId}
+              onChange={(e) => {
+                setRoadmapId(e.target.value);
+                setMilestoneId("");
+              }}
+            >
+              <option value="">No roadmap</option>
+              {roadmaps.map((r: any) => (
+                <option key={r.id} value={r.id}>
+                  {r.title}
+                </option>
+              ))}
+            </select>
+          )}
 
-            {projects.map((p: any) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+          {/* MILESTONE SELECT (optional, only when roadmap selected) */}
+          {roadmapId && milestones.length > 0 && (
+            <select
+              className="w-full border rounded p-2"
+              value={milestoneId}
+              onChange={(e) => setMilestoneId(e.target.value)}
+            >
+              <option value="">No milestone</option>
+              {milestones.map((m: any) => (
+                <option key={m.id} value={m.id}>
+                  {m.title}
+                </option>
+              ))}
+            </select>
+          )}
 
-          {/* ACTIONS */}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel

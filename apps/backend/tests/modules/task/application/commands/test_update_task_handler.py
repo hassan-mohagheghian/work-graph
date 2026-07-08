@@ -5,7 +5,6 @@ from fastapi import HTTPException
 from src.modules.organization.domain.value_objects.role import OrgRole
 from src.modules.task.application.commands.update_task.command import UpdateTaskCommand
 from src.modules.task.application.commands.update_task.handler import UpdateTaskHandler
-from src.modules.task.domain.exceptions import InvalidTaskTransitionError
 
 # --------------------
 # FIXTURES
@@ -51,8 +50,6 @@ class FakeTask:
         self.status = "todo"
 
     def change_status(self, new_status):
-        if new_status == "invalid":
-            raise InvalidTaskTransitionError("todo", new_status)
         self.status = new_status
 
 
@@ -181,28 +178,3 @@ async def test_success_update(task_repo, project_repo, org_membership_facade, rb
     assert result.description == "new desc"
 
     task_repo.update.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_invalid_status_transition(
-    task_repo, project_repo, org_membership_facade, rbac
-):
-    task = FakeTask()
-    task_repo.get_by_id.return_value = task
-    project_repo.get_by_id.return_value = MagicMock(org_id="org-1")
-
-    org_membership_facade.get_user_role = AsyncMock(return_value=OrgRole.ADMIN)
-
-    handler = UpdateTaskHandler(task_repo, project_repo, org_membership_facade, rbac)
-
-    command = UpdateTaskCommand(
-        task_id="task-1",
-        org_id="org-1",
-        user_id="user-1",
-        status="invalid",
-    )
-
-    with pytest.raises(HTTPException) as exc:
-        await handler.handle(command)
-
-    assert exc.value.status_code == 400

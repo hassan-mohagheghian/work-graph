@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String
+from sqlalchemy import Column, Integer, String
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from src.modules.task.domain.value_objects.task_status import TaskStatus
@@ -19,3 +19,4 @@ class TaskModel(IDMixin, TimestampedMixin, Base):
     )
     assignee_id = Column(PG_UUID(as_uuid=True), nullable=True)
     milestone_id = Column(PG_UUID(as_uuid=True), nullable=True)
+    order = Column(Integer, nullable=False, default=0)

@@ -1,9 +1,8 @@
 from fastapi import HTTPException
 from src.modules.organization.application.facade import OrgMembershipFacade
 from src.modules.project.domain.repos.project_repo import ProjectRepository
-from src.modules.task.application.commands.update_task.command import UpdateTaskCommand
+from src.modules.task.application.commands.update_task.command import UpdateTaskCommand, _UNSET
 from src.modules.task.application.services.task_rbac import TaskRBAC
-from src.modules.task.domain.exceptions import InvalidTaskTransitionError
 from src.modules.task.domain.repos.task_repo import TaskRepo
 
 
@@ -43,12 +42,9 @@ class UpdateTaskHandler:
             task.description = cmd.description
 
         if cmd.status is not None:
-            try:
-                task.change_status(cmd.status)
-            except InvalidTaskTransitionError as e:
-                raise HTTPException(status_code=400, detail=str(e))
+            task.change_status(cmd.status)
 
-        if cmd.milestone_id is not None:
+        if cmd.milestone_id is not _UNSET:
             task.milestone_id = cmd.milestone_id
 
         await self.task_repo.update(task)

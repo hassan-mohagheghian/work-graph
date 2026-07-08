@@ -2,22 +2,31 @@
 
 import { useState } from "react";
 import { useOrg } from "@/shared/context/org-context";
+import { useTasksByProject } from "@/features/task/hooks/use-tasks-by-project";
 import { useRoadmaps } from "../roadmap/hooks/use-roadmaps";
 import { useMilestones } from "../milestone/hooks/use-milestones";
 import { useReorderMilestones } from "../milestone/hooks/use-reorder-milestones";
 import { useDeleteRoadmap } from "../roadmap/hooks/use-delete-roadmap";
 import { useActivateRoadmap } from "../roadmap/hooks/use-activate-roadmap";
 
-import { CreateRoadmapDialog } from "../roadmap/components/create-roadmap-dialog";
-import { EditRoadmapDialog } from "../roadmap/components/edit-roadmap-dialog";
-import { CreateMilestoneDialog } from "../milestone/components/create-milestone-dialog";
+import { CreateRoadmapSheet } from "../roadmap/components/create-roadmap-dialog";
+import { EditRoadmapSheet } from "../roadmap/components/edit-roadmap-dialog";
+import { CreateMilestoneSheet } from "../milestone/components/create-milestone-dialog";
+import { EditMilestoneSheet } from "../milestone/components/edit-milestone-dialog";
 import { MilestoneSection } from "../milestone/components/milestone-section";
 
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Separator } from "@/shared/ui/separator";
-import { Trash2, Zap, Plus } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Trash2,
+  Zap,
+  Pencil,
+  Plus,
+} from "lucide-react";
 
 import {
   DndContext,
@@ -51,23 +60,35 @@ const STATUS_LABELS: Record<string, string> = {
 
 export function RoadmapView({ projectId }: { projectId: string }) {
   const { orgId } = useOrg();
-  const [selectedRoadmapId, setSelectedRoadmapId] = useState<string | null>(null);
+  const [expandedRoadmapId, setExpandedRoadmapId] = useState<string | null>(
+    null
+  );
+
+  // Sheet states
+  const [createRoadmapOpen, setCreateRoadmapOpen] = useState(false);
+  const [editRoadmap, setEditRoadmap] = useState<any>(null);
+  const [editRoadmapOpen, setEditRoadmapOpen] = useState(false);
+  const [createMilestoneOpen, setCreateMilestoneOpen] = useState(false);
+  const [createMilestoneRoadmapId, setCreateMilestoneRoadmapId] = useState("");
+  const [editMilestone, setEditMilestone] = useState<any>(null);
+  const [editMilestoneOpen, setEditMilestoneOpen] = useState(false);
 
   const { data: roadmaps = [], isLoading: loadingRoadmaps } = useRoadmaps(
     orgId,
     projectId
   );
 
-  // Auto-select active or first roadmap
-  const effectiveSelectedId =
-    selectedRoadmapId ??
+  const effectiveExpandedId =
+    expandedRoadmapId ??
     roadmaps.find((r: any) => r.status === "active")?.id ??
     roadmaps[0]?.id;
 
   const { data: milestones = [], isLoading: loadingMilestones } = useMilestones(
     orgId,
-    effectiveSelectedId
+    effectiveExpandedId
   );
+
+  const { data: tasks = [] } = useTasksByProject(orgId, projectId);
 
   const reorderMilestones = useReorderMilestones(orgId);
   const deleteRoadmap = useDeleteRoadmap(orgId);
@@ -80,12 +101,33 @@ export function RoadmapView({ projectId }: { projectId: string }) {
     })
   );
 
-  const selectedRoadmap = roadmaps.find((r: any) => r.id === effectiveSelectedId);
+  const expandedRoadmap = roadmaps.find(
+    (r: any) => r.id === effectiveExpandedId
+  );
+
+  function handleToggle(roadmapId: string) {
+    setExpandedRoadmapId((prev) => (prev === roadmapId ? null : roadmapId));
+  }
+
+  function handleEditRoadmap(roadmap: any) {
+    setEditRoadmap(roadmap);
+    setEditRoadmapOpen(true);
+  }
+
+  function handleAddMilestone(roadmapId: string) {
+    setCreateMilestoneRoadmapId(roadmapId);
+    setCreateMilestoneOpen(true);
+  }
+
+  function handleEditMilestone(milestone: any) {
+    setEditMilestone(milestone);
+    setEditMilestoneOpen(true);
+  }
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
-    if (over && active.id !== over.id && effectiveSelectedId) {
+    if (over && active.id !== over.id && effectiveExpandedId) {
       const oldIndex = milestones.findIndex((m: any) => m.id === active.id);
       const newIndex = milestones.findIndex((m: any) => m.id === over.id);
 
@@ -93,7 +135,7 @@ export function RoadmapView({ projectId }: { projectId: string }) {
       const orderedIds = reordered.map((m: any) => m.id);
 
       reorderMilestones.mutate({
-        roadmapId: effectiveSelectedId,
+        roadmapId: effectiveExpandedId,
         orderedIds,
       });
     }
@@ -102,189 +144,225 @@ export function RoadmapView({ projectId }: { projectId: string }) {
   if (loadingRoadmaps) return <p>Loading roadmaps...</p>;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Roadmap</h2>
-        <CreateRoadmapDialog />
+        <h2 className="text-base font-semibold">Roadmaps</h2>
+        <Button size="sm" className="h-7 text-xs" onClick={() => setCreateRoadmapOpen(true)}>
+          <Plus className="size-3.5 mr-1" />
+          Create Roadmap
+        </Button>
       </div>
 
-      {/* Empty state */}
       {roadmaps.length === 0 && (
         <Card>
-          <CardContent className="p-8 text-center">
-            <p className="text-muted-foreground mb-4">
+          <CardContent className="p-6 text-center">
+            <p className="text-sm text-muted-foreground mb-3">
               No roadmaps yet. Create one to start planning your project.
             </p>
-            <CreateRoadmapDialog />
+            <Button size="sm" onClick={() => setCreateRoadmapOpen(true)}>
+              <Plus className="size-3.5 mr-1" />
+              Create Roadmap
+            </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Roadmaps sidebar + milestones detail */}
-      {roadmaps.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-          {/* Roadmap list sidebar */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Roadmaps ({roadmaps.length})
-            </h3>
-            <div className="space-y-2">
-              {roadmaps.map((roadmap: any) => {
-                const isSelected = roadmap.id === effectiveSelectedId;
-                return (
-                  <button
-                    key={roadmap.id}
-                    onClick={() => setSelectedRoadmapId(roadmap.id)}
-                    className={`w-full text-left p-3 rounded-lg border transition ${
-                      isSelected
-                        ? "border-primary bg-primary/5 shadow-sm"
-                        : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium truncate">
-                            {roadmap.title}
-                          </span>
-                          {roadmap.status === "active" && (
-                            <Zap className="size-3.5 text-blue-500 shrink-0" />
-                          )}
-                        </div>
-                        {roadmap.description && (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            {roadmap.description}
-                          </p>
-                        )}
-                      </div>
-                      <Badge
-                        variant="secondary"
-                        className={`text-[10px] shrink-0 ${STATUS_COLORS[roadmap.status]}`}
-                      >
-                        {STATUS_LABELS[roadmap.status]}
-                      </Badge>
-                    </div>
+      <div className="space-y-3">
+        {roadmaps.map((roadmap: any) => {
+          const isExpanded = roadmap.id === effectiveExpandedId;
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-1 mt-2">
-                      {roadmap.status === "draft" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            activateRoadmap.mutate(roadmap.id);
-                          }}
-                        >
-                          <Zap className="size-3 mr-1" />
-                          Activate
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 text-xs text-destructive hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteRoadmap.mutate(roadmap.id);
-                        }}
-                      >
-                        <Trash2 className="size-3 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          return (
+            <Card
+              key={roadmap.id}
+              className={`transition ${
+                isExpanded ? "ring-2 ring-primary/20" : ""
+              }`}
+            >
+              {/* Roadmap header — div, not button, to avoid nesting */}
+              <div
+                className="flex items-center gap-2.5 p-3 cursor-pointer hover:bg-muted/30 transition rounded-lg"
+                onClick={() => handleToggle(roadmap.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleToggle(roadmap.id);
+                  }
+                }}
+              >
+                <div className="shrink-0">
+                  {isExpanded ? (
+                    <ChevronDown className="size-3.5 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="size-3.5 text-muted-foreground" />
+                  )}
+                </div>
 
-          {/* Milestones detail panel */}
-          <div className="space-y-4">
-            {selectedRoadmap ? (
-              <>
-                {/* Roadmap header with edit */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-lg">
-                        {selectedRoadmap.title}
-                      </h3>
-                      <Badge
-                        variant="secondary"
-                        className={STATUS_COLORS[selectedRoadmap.status]}
-                      >
-                        {STATUS_LABELS[selectedRoadmap.status]}
-                      </Badge>
-                    </div>
-                    {selectedRoadmap.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {selectedRoadmap.description}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-medium text-sm truncate">
+                      {roadmap.title}
+                    </span>
+                    {roadmap.status === "active" && (
+                      <Zap className="size-3 text-blue-500 shrink-0" />
+                    )}
+                    <Badge
+                      variant="secondary"
+                      className={`text-[10px] shrink-0 ${STATUS_COLORS[roadmap.status]}`}
+                    >
+                      {STATUS_LABELS[roadmap.status]}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {roadmap.description && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {roadmap.description}
                       </p>
                     )}
                   </div>
-                  <EditRoadmapDialog roadmap={selectedRoadmap} />
                 </div>
 
-                <Separator />
-
-                {/* Milestones section */}
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">
-                    Milestones ({milestones.length})
-                  </h4>
-                  <CreateMilestoneDialog roadmapId={effectiveSelectedId!} />
-                </div>
-
-                {loadingMilestones ? (
-                  <p className="text-muted-foreground text-sm">
-                    Loading milestones...
-                  </p>
-                ) : milestones.length === 0 ? (
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <p className="text-muted-foreground mb-3">
-                        No milestones yet. Add milestones to organize your
-                        roadmap.
-                      </p>
-                      <CreateMilestoneDialog roadmapId={effectiveSelectedId!} />
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
+                {/* Quick actions — separate div, not nested buttons */}
+                <div
+                  className="flex items-center gap-1 shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0"
+                    onClick={() => handleEditRoadmap(roadmap)}
                   >
-                    <SortableContext
-                      items={milestones.map((m: any) => m.id)}
-                      strategy={verticalListSortingStrategy}
+                    <Pencil className="size-3.5" />
+                  </Button>
+                  {roadmap.status === "draft" && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs"
+                      onClick={() => activateRoadmap.mutate(roadmap.id)}
                     >
-                      <div className="space-y-2">
-                        {milestones.map((milestone: any) => (
-                          <MilestoneSection
-                            key={milestone.id}
-                            milestone={milestone}
-                            orgId={orgId!}
-                            projectId={projectId}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                )}
-              </>
-            ) : (
-              <Card>
-                <CardContent className="p-6 text-center text-muted-foreground">
-                  Select a roadmap to view its milestones
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+                      <Zap className="size-3 mr-1" />
+                      Activate
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 text-xs text-destructive hover:text-destructive"
+                    onClick={() => deleteRoadmap.mutate(roadmap.id)}
+                  >
+                    <Trash2 className="size-3" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Expanded milestones */}
+              {isExpanded && (
+                <div className="px-3 pb-3">
+                  <Separator className="mb-3" />
+
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-medium text-muted-foreground">
+                      Milestones ({milestones.length})
+                    </h4>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 text-xs"
+                      onClick={() => handleAddMilestone(roadmap.id)}
+                    >
+                      <Plus className="size-3 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+
+                  {loadingMilestones ? (
+                    <p className="text-xs text-muted-foreground py-2">
+                      Loading milestones...
+                    </p>
+                  ) : milestones.length === 0 ? (
+                    <div className="text-center py-4 border border-dashed rounded-lg">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        No milestones yet
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 text-xs"
+                        onClick={() => handleAddMilestone(roadmap.id)}
+                      >
+                        <Plus className="size-3 mr-1" />
+                        Add Milestone
+                      </Button>
+                    </div>
+                  ) : (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext
+                        items={milestones.map((m: any) => m.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-2">
+                          {milestones.map((milestone: any) => {
+                            const milestoneTasks = tasks.filter(
+                              (t: any) => t.milestone_id === milestone.id
+                            );
+                            return (
+                              <MilestoneSection
+                                key={milestone.id}
+                                milestone={milestone}
+                                orgId={orgId!}
+                                projectId={projectId}
+                                onEdit={handleEditMilestone}
+                                taskCount={milestoneTasks.length}
+                              />
+                            );
+                          })}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  )}
+                </div>
+              )}
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Sheets */}
+      <CreateRoadmapSheet
+        projectId={projectId}
+        open={createRoadmapOpen}
+        onOpenChange={setCreateRoadmapOpen}
+      />
+
+      {editRoadmap && (
+        <EditRoadmapSheet
+          roadmap={editRoadmap}
+          open={editRoadmapOpen}
+          onOpenChange={setEditRoadmapOpen}
+        />
+      )}
+
+      {createMilestoneRoadmapId && (
+        <CreateMilestoneSheet
+          roadmapId={createMilestoneRoadmapId}
+          open={createMilestoneOpen}
+          onOpenChange={setCreateMilestoneOpen}
+        />
+      )}
+
+      {editMilestone && (
+        <EditMilestoneSheet
+          milestone={editMilestone}
+          open={editMilestoneOpen}
+          onOpenChange={setEditMilestoneOpen}
+        />
       )}
     </div>
   );

@@ -9,16 +9,19 @@ import { useMilestones } from "../milestone/hooks/use-milestones";
 import { useDeleteMilestone } from "../milestone/hooks/use-delete-milestone";
 import { useUpdateMilestone } from "../milestone/hooks/use-update-milestone";
 
-import { CreateRoadmapDialog } from "../roadmap/components/create-roadmap-dialog";
+import { CreateRoadmapSheet } from "../roadmap/components/create-roadmap-dialog";
 import { RoadmapCard } from "../roadmap/components/roadmap-card";
-import { CreateMilestoneDialog } from "../milestone/components/create-milestone-dialog";
+import { CreateMilestoneSheet } from "../milestone/components/create-milestone-dialog";
 import { MilestoneCard } from "../milestone/components/milestone-card";
 
 import { Button } from "@/shared/ui/button";
+import { Plus } from "lucide-react";
 
 export function PlanningView({ projectId }: { projectId?: string }) {
   const { orgId } = useOrg();
   const [selectedRoadmapId, setSelectedRoadmapId] = useState<string | null>(null);
+  const [createRoadmapOpen, setCreateRoadmapOpen] = useState(false);
+  const [createMilestoneOpen, setCreateMilestoneOpen] = useState(false);
 
   const { data: roadmaps = [], isLoading: loadingRoadmaps } = useRoadmaps(
     orgId,
@@ -41,7 +44,10 @@ export function PlanningView({ projectId }: { projectId?: string }) {
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">Planning</h2>
-        <CreateRoadmapDialog />
+        <Button size="sm" onClick={() => setCreateRoadmapOpen(true)}>
+          <Plus className="size-4 mr-1" />
+          Create Roadmap
+        </Button>
       </div>
 
       {/* ROADMAPS LIST */}
@@ -76,7 +82,10 @@ export function PlanningView({ projectId }: { projectId?: string }) {
           </div>
 
           <div className="flex justify-end">
-            <CreateMilestoneDialog roadmapId={selectedRoadmapId} />
+            <Button size="sm" onClick={() => setCreateMilestoneOpen(true)}>
+              <Plus className="size-4 mr-1" />
+              Add Milestone
+            </Button>
           </div>
 
           <div className="space-y-3">
@@ -100,6 +109,20 @@ export function PlanningView({ projectId }: { projectId?: string }) {
             )}
           </div>
         </div>
+      )}
+
+      <CreateRoadmapSheet
+        projectId={projectId ?? ""}
+        open={createRoadmapOpen}
+        onOpenChange={setCreateRoadmapOpen}
+      />
+
+      {selectedRoadmapId && (
+        <CreateMilestoneSheet
+          roadmapId={selectedRoadmapId}
+          open={createMilestoneOpen}
+          onOpenChange={setCreateMilestoneOpen}
+        />
       )}
     </div>
   );

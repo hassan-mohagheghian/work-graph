@@ -8,7 +8,7 @@ import { useOrg } from "@/shared/context/org-context";
 import { useRoadmaps } from "@/features/planning/roadmap/hooks/use-roadmaps";
 import { useMilestones } from "@/features/planning/milestone/hooks/use-milestones";
 import { useDeleteMilestone } from "@/features/planning/milestone/hooks/use-delete-milestone";
-import { CreateMilestoneDialog } from "@/features/planning/milestone/components/create-milestone-dialog";
+import { CreateMilestoneSheet } from "@/features/planning/milestone/components/create-milestone-dialog";
 import { ROUTES } from "@/shared/routes";
 
 import { Badge } from "@/shared/ui/badge";
@@ -65,6 +65,7 @@ export default function MilestonesPage() {
   );
 
   const deleteMilestone = useDeleteMilestone(orgId);
+  const [createMilestoneOpen, setCreateMilestoneOpen] = useState(false);
 
   // Auto-select first active or first roadmap
   useEffect(() => {
@@ -84,7 +85,10 @@ export default function MilestonesPage() {
           </p>
         </div>
         {selectedRoadmapId && (
-          <CreateMilestoneDialog roadmapId={selectedRoadmapId} />
+          <Button size="sm" onClick={() => setCreateMilestoneOpen(true)}>
+            <Plus className="size-4 mr-1" />
+            Add Milestone
+          </Button>
         )}
       </div>
 
@@ -192,6 +196,14 @@ export default function MilestonesPage() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {selectedRoadmapId && (
+        <CreateMilestoneSheet
+          roadmapId={selectedRoadmapId}
+          open={createMilestoneOpen}
+          onOpenChange={setCreateMilestoneOpen}
+        />
       )}
     </div>
   );

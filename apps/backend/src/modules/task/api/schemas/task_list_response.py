@@ -12,6 +12,8 @@ class TaskResponse:
     description: str | None
     status: str
     milestone_id: UUID | None
+    roadmap_title: str | None
+    milestone_title: str | None
     created_at: datetime
 
 

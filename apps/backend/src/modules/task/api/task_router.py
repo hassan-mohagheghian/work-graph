@@ -6,15 +6,20 @@ from pydantic import BaseModel
 from src.modules.project.api.project_router import get_project_repo
 from src.modules.task.api.mappers.task_list_mapper import TaskListResponseMapper
 from src.modules.task.application.commands.create_task.command import CreateTaskCommand
+from src.modules.task.application.commands.update_task.command import _UNSET
 from src.modules.task.application.commands.create_task.handler import CreateTaskHandler
 from src.modules.task.application.commands.delete_task.command import DeleteTaskCommand
 from src.modules.task.application.commands.delete_task.handler import DeleteTaskHandler
+from src.modules.task.application.commands.reorder_tasks.command import (
+    ReorderTasksCommand,
+)
+from src.modules.task.application.commands.reorder_tasks.handler import (
+    ReorderTasksHandler,
+)
 from src.modules.task.application.commands.update_task.command import UpdateTaskCommand
 from src.modules.task.application.commands.update_task.handler import UpdateTaskHandler
 from src.modules.task.application.queries.get_task.handler import GetTaskHandler
 from src.modules.task.application.queries.get_task.query import GetTaskQuery
-from src.modules.task.application.queries.list_tasks.handler import ListTasksHandler
-from src.modules.task.application.queries.list_tasks.query import ListTasksQuery
 from src.modules.task.application.services.task_rbac import TaskRBAC
 from src.modules.task.domain.value_objects.task_status import TaskStatus
 from src.modules.task.infrastructure.persistence.sqlalchemy_task_repo import (
@@ -41,6 +46,7 @@ class CreateTaskRequest(BaseModel):
     title: str
     description: str | None = None
     milestone_id: UUID | None = None
+    status: TaskStatus = TaskStatus.todo
 
 
 @router.post("")
@@ -58,6 +64,7 @@ async def create_task(
             title=body.title,
             description=body.description,
             milestone_id=body.milestone_id,
+            status=body.status,
         )
     )
 
@@ -68,9 +75,12 @@ async def list_tasks_by_project(
     task_repo=Depends(get_task_repo),
     org_id=Depends(get_current_org_id),
 ):
-    handler = ListTasksHandler(task_repo)
-
-    return await handler.handle(ListTasksQuery(project_id=project_id, org_id=org_id))
+    result = await task_repo.list_with_details(
+        org_id=org_id,
+        project_id=project_id,
+        limit=500,
+    )
+    return TaskListResponseMapper.to_response(result)
 
 
 class UpdateTaskRequest(BaseModel):
@@ -105,7 +115,7 @@ async def update_task(
             title=body.title,
             description=body.description,
             status=body.status,
-            milestone_id=body.milestone_id,
+            milestone_id=body.milestone_id if "milestone_id" in body.model_fields_set else _UNSET,
         )
     )
 
@@ -119,19 +129,13 @@ async def list_tasks(
     org_id=Depends(get_current_org_id),
     task_repo=Depends(get_task_repo),
 ):
-    handler = ListTasksHandler(task_repo=task_repo)
-    query = ListTasksQuery(
-        org_id=org_id, project_id=project_id, status=status, limit=limit, offset=offset
-    )
-    query = ListTasksQuery(
+    result = await task_repo.list_with_details(
         org_id=org_id,
         project_id=project_id,
         status=status,
         limit=limit,
         offset=offset,
     )
-
-    result = await handler.handle(query)
     return TaskListResponseMapper.to_response(result)
 
 
@@ -164,3 +168,25 @@ async def delete_task(
     )
 
     return {"status": "deleted"}
+
+
+class ReorderTasksRequest(BaseModel):
+    project_id: UUID
+    ordered_ids: list[UUID]
+
+
+@router.post("/reorder")
+async def reorder_tasks(
+    body: ReorderTasksRequest,
+    task_repo=Depends(get_task_repo),
+    org_id: UUID = Depends(get_current_org_id),
+):
+    handler = ReorderTasksHandler(task_repo)
+    await handler.handle(
+        ReorderTasksCommand(
+            project_id=body.project_id,
+            org_id=org_id,
+            ordered_ids=body.ordered_ids,
+        )
+    )
+    return {"status": "reordered"}

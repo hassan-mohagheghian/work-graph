@@ -15,6 +15,7 @@ class CreateTaskHandler:
             title=cmd.title,
             description=cmd.description,
             milestone_id=cmd.milestone_id,
+            status=cmd.status,
             created_at=datetime.now(timezone.utc),
         )
 
