@@ -126,4 +126,4 @@ docker-compose.override.yml
 *.iml
 
 # Uploaded files
-uploads/
+uploads/.mimocode/
