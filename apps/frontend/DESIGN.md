@@ -1,11 +1,11 @@
 # WorkGraph Frontend Design System
 
-This document describes the layout and visual conventions used across the WorkGraph frontend. The goal is consistent alignment, spacing, and hierarchy on every page.
+Version: 2.0
 
 ## Stack
 
-- **Framework:** Next.js (App Router)
-- **Styling:** Tailwind CSS v4 + shadcn/ui
+- **Framework:** Next.js 16 (App Router)
+- **Styling:** Tailwind CSS v4 + shadcn/ui (new-york style)
 - **Theme tokens:** `src/app/globals.css`
 - **Layout primitives:** `src/shared/layout/page-layout.tsx`
 - **UI components:** `src/shared/ui/`
@@ -18,13 +18,12 @@ All authenticated content shares the same horizontal frame as the header:
 container mx-auto px-4
 ```
 
-This is exported as `pageShellClass` and used by:
-
+Exported as `pageShellClass`, used by:
 - `src/shared/ui/header.tsx` — sticky top bar
 - `PageShell` — outer wrapper for page routes
 - Organization layout — wraps all `/organizations/[organizationId]/*` routes
 
-**Do not** add ad-hoc `px-6`, `p-6`, or separate `container` wrappers on standard pages. Use the layout components below.
+**Do not** add ad-hoc `px-6`, `p-6`, or separate `container` wrappers.
 
 ## Layout hierarchy
 
@@ -33,19 +32,51 @@ RootLayout (app/layout.tsx)
 ├── Header          → pageShellClass
 └── main
     ├── /organizations          → PageShell + PageBody
-    └── /organizations/[orgId]  → PageShell (org layout)
-        ├── org pages           → PageHeader + PageBody
+    └── /organizations/[orgId]  → PageShell (org layout with tabs)
+        ├── org pages           → SectionHeader + PageBody
         └── /projects/[id]      → project layout (breadcrumb, h1, tabs)
             └── tab content     → SectionHeader + PageBody
 ```
 
-### Special routes
+## Header navigation
 
-| Route | Layout |
-|-------|--------|
-| `/` | `PageShell` centered (marketing-style hero) |
-| `/login` | Full-height centered, no `PageShell` |
-| `/organizations` | Own `PageShell` (outside org layout) |
+The header provides two dropdowns:
+
+### Org dropdown
+```
+┌─────────────────────────────────┐
+│ [All Orgs]  [Current Org ▼]    │ ← Two buttons in first row
+├─────────────────────────────────┤
+│ (submenu when Current Org clicked)
+│ ← Back                          │
+│ Overview, Projects, Members,    │
+│ Settings                        │
+├─────────────────────────────────┤
+│ [🔍 Search organizations...]    │
+├─────────────────────────────────┤
+│ ○ Org 1 (active)                │
+│ ○ Org 2                         │ ← Scrollable list (max 8 items)
+│ ○ Org 3                         │
+└─────────────────────────────────┘
+```
+
+### Projects dropdown
+```
+┌─────────────────────────────────┐
+│ [All Projects] [Project ▼]     │
+├─────────────────────────────────┤
+│ (submenu when Project clicked)
+│ ← Back                          │
+│ Overview, Documents, Roadmap,   │
+│ Tasks, Members, Settings        │
+├─────────────────────────────────┤
+│ [🔍 Search projects...]         │
+├─────────────────────────────────┤
+│ Project 1 (active)              │
+│ Project 2                       │ ← Scrollable list
+│ Project 3                       │
+└─────────────────────────────────┘
+```
 
 ## Layout components
 
@@ -53,7 +84,7 @@ Import from `@/shared/layout/page-layout`.
 
 ### `PageShell`
 
-Outer page frame. Applies `container mx-auto px-4` and `py-6` by default.
+Outer page frame. Applies `container mx-auto px-4` and `py-6`.
 
 ```tsx
 <PageShell>
@@ -61,11 +92,9 @@ Outer page frame. Applies `container mx-auto px-4` and `py-6` by default.
 </PageShell>
 ```
 
-Set `padded={false}` to skip vertical padding (rare).
-
 ### `PageHeader`
 
-Top-level page title for org-level and standalone routes. Renders an **h1** (`text-2xl font-semibold tracking-tight`).
+Top-level page title (h1). Used on org-level and standalone routes.
 
 ```tsx
 <PageHeader
@@ -77,17 +106,15 @@ Top-level page title for org-level and standalone routes. Renders an **h1** (`te
 
 ### `SectionHeader`
 
-Sub-page title inside the project layout (tabs, detail views). Renders an **h2** (`text-xl font-semibold tracking-tight`).
+Sub-page title (h2). Used inside project/org tab content.
 
 ```tsx
 <SectionHeader
   title="Documents"
   description="Store project knowledge for AI planning"
-  actions={<Button size="sm">Create Document</Button>}
+  actions={<Button size="sm"><Plus className="size-4 mr-1" />Create Document</Button>}
 />
 ```
-
-The project layout already provides the project **h1** and tab navigation. Tab content should use `SectionHeader`, not another `PageHeader`.
 
 ### `PageBody`
 
@@ -95,139 +122,143 @@ Vertical stack for page content.
 
 | `spacing` | Class | Use when |
 |-----------|-------|----------|
-| `"default"` (default) | `space-y-6` | Most pages |
-| `"tight"` | `space-y-4` | Dense lists (e.g. projects table) |
-
-```tsx
-<PageBody spacing="tight">
-  <PageHeader ... />
-  <Table>...</Table>
-</PageBody>
-```
+| `"default"` | `space-y-6` | Most pages |
+| `"tight"` | `space-y-4` | Dense lists (projects table) |
 
 ### `PageLoading`
 
-Consistent loading placeholder (`text-sm text-muted-foreground`).
+Consistent loading placeholder.
 
 ```tsx
 if (isLoading) return <PageLoading />;
 ```
 
-## Spacing tokens
+## Button conventions
 
-Defined in `globals.css` `@theme inline` — keep in sync with `page-layout.tsx`:
+### Primary actions (Create/Add/Invite)
 
-| Token | Value | Tailwind equivalent |
-|-------|-------|---------------------|
-| `--spacing-page-x` | `1rem` | `px-4` |
-| `--spacing-page-y` | `1.5rem` | `py-6` |
-| `--spacing-page-section` | `1.5rem` | `space-y-6` |
-| `--spacing-page-section-tight` | `1rem` | `space-y-4` |
+In `SectionHeader` actions:
+```tsx
+<Button size="sm" onClick={() => setCreateOpen(true)}>
+  <Plus className="size-4 mr-1" />
+  Create Task
+</Button>
+```
+
+In empty state cards:
+```tsx
+<Button onClick={() => setCreateOpen(true)}>
+  <Plus className="size-4 mr-1" />
+  Create Task
+</Button>
+```
+
+### Secondary actions (Edit)
+
+```tsx
+<Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+  <Pencil className="size-3.5 mr-1" />
+  Edit
+</Button>
+```
+
+### Rules
+- Primary actions: default variant, `size="sm"` in header, no size in empty state
+- Secondary actions: `variant="outline"`, `size="sm"`
+- Icons: `size-4` with `mr-1` spacing
+- All tabs use `SectionHeader` with consistent action buttons
 
 ## Typography
 
 | Level | Element | Classes | Where |
 |-------|---------|---------|-------|
-| Page title | `h1` | `text-2xl font-semibold tracking-tight` | `PageHeader`, project layout |
-| Section title | `h2` | `text-xl font-semibold tracking-tight` | `SectionHeader` |
-| Description | `p` | `text-sm text-muted-foreground` | Headers, card subtitles |
-| Body | `p` | `text-sm` | General content |
+| Page title | h1 | `text-2xl font-semibold tracking-tight` | `PageHeader` |
+| Section title | h2 | `text-xl font-semibold tracking-tight` | `SectionHeader` |
+| Description | p | `text-sm text-muted-foreground` | Headers, cards |
+| Body | p | `text-sm` | General content |
 
 ## Project layout
 
-`src/app/(protected)/organizations/[organizationId]/projects/[projectId]/layout.tsx` provides:
+`src/app/(protected)/organizations/[organizationId]/projects/[projectId]/layout.tsx`:
 
 1. Breadcrumb (Projects → project name)
-2. Project **h1**
-3. Full-width separator
+2. Project h1
+3. Separator
 4. Tab bar (Overview, Documents, Roadmap, Tasks, Members, Settings)
 5. Tab content (`children`)
 
-Tab pages should only add `SectionHeader` + content — no extra horizontal padding or duplicate project title.
+## Org layout
 
-## Color and components
+`src/app/(protected)/organizations/[organizationId]/layout.tsx`:
 
-Colors, radius, and semantic tokens live in `globals.css` (`:root` / `.dark`). Use shadcn/ui components from `src/shared/ui/` and semantic classes:
-
-- `bg-background`, `text-foreground`
-- `text-muted-foreground`
-- `border`, `bg-muted`
-- `bg-card`, `text-card-foreground`
-
-Prefer these over hard-coded colors like `bg-gray-50` or `hover:bg-gray-50`.
+1. Breadcrumb (Organizations → org name)
+2. Org h1
+3. Separator
+4. Tab bar (Overview, Projects, Members, Settings)
+5. Tab content (`children`)
 
 ## Notifications
 
-Temporary toast notifications use **Sonner** via `notify` from `@/shared/lib/notify`.
+Toast notifications use **Sonner** via `@/shared/lib/notify`. Position: bottom-right.
 
-| Helper | Color | Auto-dismiss |
-|--------|-------|--------------|
-| `notify.success()` | Green | 4s |
-| `notify.error()` | Red | 6s |
-| `notify.warning()` | Amber | 5s |
-| `notify.info()` | Blue | 4s |
+| Helper | Auto-dismiss |
+|--------|--------------|
+| `notify.success()` | 4s |
+| `notify.error()` | 6s |
+| `notify.warning()` | 5s |
+| `notify.info()` | 4s |
 
-All toasts include a close button and can be dismissed by the user.
-
-**Mutations (React Query):** errors are shown automatically. Add `meta: { successMessage: "..." }` for success toasts. Use `meta: { silentError: true }` to suppress error toasts.
-
-**Manual calls:** use `notify.error(getErrorMessage(error))` in `try/catch` blocks (e.g. non-React Query flows).
-
-```tsx
-import { notify } from "@/shared/lib/notify";
-import { getErrorMessage } from "@/shared/lib/errors";
-
-notify.success("Saved");
-notify.error(getErrorMessage(error));
-```
+**React Query mutations:** errors auto-shown. Add `meta: { successMessage: "..." }` for success.
 
 ## Create and edit flows
 
-Use **bottom sheets** (`Sheet` with `side="bottom"`) for create/edit forms — not dialogs or dedicated pages.
+Use **bottom sheets** (`Sheet` with `side="bottom"`) for all create/edit forms.
 
 | Action | Component |
 |--------|-----------|
 | Create organization | `CreateOrganizationSheet` |
 | Edit organization | `EditOrganizationSheet` |
+| Invite member (org) | `InviteMemberSheet` |
 | Create project | `CreateProjectSheet` |
 | Edit project | `EditProjectSheet` |
+| Add member (project) | `AddProjectMemberSheet` |
 | Create / edit task | `CreateTaskSheet` / `EditTaskSheet` |
 
-Shared pattern:
+## Empty states
+
+All list pages show a card with description and create button when empty:
 
 ```tsx
-<Sheet open={open} onOpenChange={onOpenChange}>
-  <SheetContent side="bottom" className="h-[60vh]">
-    <SheetHeader>
-      <SheetTitle>...</SheetTitle>
-      <SheetDescription>...</SheetDescription>
-    </SheetHeader>
-    <div className="flex-1 overflow-y-auto px-4 space-y-4">
-      {/* form fields with Label + Input */}
-    </div>
-    <SheetFooter>
-      <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
-      <Button size="sm">Save / Create</Button>
-    </SheetFooter>
-  </SheetContent>
-</Sheet>
+{items.length === 0 && (
+  <Card>
+    <CardContent className="p-8 text-center">
+      <p className="text-muted-foreground mb-4">
+        No items yet. Create one to get started.
+      </p>
+      <Button onClick={() => setCreateOpen(true)}>
+        <Plus className="size-4 mr-1" />
+        Create Item
+      </Button>
+    </CardContent>
+  </Card>
+)}
 ```
-
-Parent pages hold `open` state and render a trigger button in `PageHeader` `actions`.
 
 ## Adding a new page
 
-### Org-level page (`/organizations/[orgId]/something`)
+### Org-level page
 
 ```tsx
-import { PageBody, PageHeader, PageLoading } from "@/shared/layout/page-layout";
+import { PageBody, SectionHeader, PageLoading } from "@/shared/layout/page-layout";
 
 export default function SomethingPage() {
   if (isLoading) return <PageLoading />;
-
   return (
     <PageBody>
-      <PageHeader title="Something" description="Optional subtitle" />
+      <SectionHeader
+        title="Something"
+        actions={<Button size="sm"><Plus className="size-4 mr-1" />Add</Button>}
+      />
       {/* content */}
     </PageBody>
   );
@@ -236,45 +267,27 @@ export default function SomethingPage() {
 
 ### Project tab page
 
-Project layout handles the shell. In the page file:
-
 ```tsx
 import { PageBody, SectionHeader } from "@/shared/layout/page-layout";
 
 export default function SomethingTabPage() {
   return (
     <PageBody>
-      <SectionHeader title="Something" />
+      <SectionHeader title="Something" actions={...} />
       {/* content */}
     </PageBody>
   );
 }
 ```
 
-### Standalone route (outside org layout)
-
-Wrap with `PageShell`:
-
-```tsx
-import { PageBody, PageHeader, PageShell } from "@/shared/layout/page-layout";
-
-export default function StandalonePage() {
-  return (
-    <PageShell>
-      <PageBody>
-        <PageHeader title="Title" />
-        {/* content */}
-      </PageBody>
-    </PageShell>
-  );
-}
-```
-
 ## Checklist for new UI
 
-- [ ] Content aligns with header (uses `PageShell` / org layout, not custom padding)
-- [ ] Correct header level: `PageHeader` (h1) vs `SectionHeader` (h2)
-- [ ] Content wrapped in `PageBody` with appropriate spacing
+- [ ] Uses `PageShell` / org layout (not custom padding)
+- [ ] Correct header: `PageHeader` (h1) vs `SectionHeader` (h2)
+- [ ] Content in `PageBody` with appropriate spacing
 - [ ] Loading states use `PageLoading`
-- [ ] Semantic color tokens, not raw gray/blue utilities
-- [ ] Actions placed in header `actions` prop, not floating separately
+- [ ] Semantic color tokens (not raw gray/blue)
+- [ ] Actions in `SectionHeader` `actions` prop
+- [ ] Create/edit uses bottom sheet drawers
+- [ ] Empty states have card with create button
+- [ ] Buttons follow primary/secondary conventions
