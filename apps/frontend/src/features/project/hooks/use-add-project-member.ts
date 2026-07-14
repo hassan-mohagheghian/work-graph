@@ -11,6 +11,7 @@ export function useAddProjectMember(projectId: string) {
   return useMutation({
     mutationFn: (payload: AddProjectMemberRequest) =>
       addProjectMember(projectId, payload),
+    meta: { successMessage: "Member added to project" },
 
     onSuccess: () => {
       queryClient.invalidateQueries({

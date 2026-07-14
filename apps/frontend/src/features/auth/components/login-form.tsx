@@ -39,8 +39,12 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: LoginFormData) {
-    await mutateAsync(values);
-    router.push(ROUTES.HOME);
+    try {
+      await mutateAsync(values);
+      router.push(ROUTES.HOME);
+    } catch {
+      // Error toast is shown globally by the mutation cache.
+    }
   }
 
   return (

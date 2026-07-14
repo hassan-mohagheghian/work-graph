@@ -7,6 +7,7 @@ export function useUpdateMilestone(orgId?: string | null) {
   return useMutation({
     mutationFn: ({ milestoneId, data }: { milestoneId: string; data: any }) =>
       updateMilestone(orgId!, milestoneId, data),
+    meta: { successMessage: "Milestone updated" },
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["milestones", orgId] });
     },

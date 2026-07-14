@@ -6,6 +6,7 @@ export function useDeleteDocument(orgId?: string | null) {
 
   return useMutation({
     mutationFn: (documentId: string) => deleteDocument(orgId!, documentId),
+    meta: { successMessage: "Document deleted" },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", orgId] });
     },

@@ -12,6 +12,7 @@ import { useTasksByProject } from "@/features/task/hooks/use-tasks-by-project";
 import { useProjectMembers } from "@/features/project/hooks/use-project-members";
 import { EditProjectSheet } from "@/features/project/components/edit-project-sheet";
 import { ROUTES } from "@/shared/routes";
+import { SectionHeader } from "@/shared/layout/page-layout";
 
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -74,19 +75,20 @@ export default function ProjectOverviewPage() {
   ];
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">Overview</h2>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-7 text-xs"
-          onClick={() => setEditOpen(true)}
-        >
-          <Pencil className="size-3.5 mr-1" />
-          Edit Project
-        </Button>
-      </div>
+    <div className="space-y-4">
+      <SectionHeader
+        title="Overview"
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEditOpen(true)}
+          >
+            <Pencil className="size-3.5 mr-1" />
+            Edit Project
+          </Button>
+        }
+      />
 
       {/* Stats grid */}
       <div className="grid gap-2.5 grid-cols-2 md:grid-cols-4">

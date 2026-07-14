@@ -6,6 +6,7 @@ export function useUpdateTask(orgId?: string | null) {
 
   return useMutation({
     mutationFn: ({ taskId, data }: any) => updateTask(orgId!, taskId, data),
+    meta: { successMessage: "Task updated" },
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tasks", orgId] });

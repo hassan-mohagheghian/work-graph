@@ -6,6 +6,7 @@ export function useDeleteMilestone(orgId?: string | null) {
 
   return useMutation({
     mutationFn: (milestoneId: string) => deleteMilestone(orgId!, milestoneId),
+    meta: { successMessage: "Milestone deleted" },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["milestones", orgId] });
     },

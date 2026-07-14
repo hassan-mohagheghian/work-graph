@@ -12,6 +12,7 @@ export function useUpdateProject(orgId?: string | null) {
       projectId: string;
       data: { name?: string; description?: string };
     }) => updateProject(orgId!, projectId, data),
+    meta: { successMessage: "Project updated" },
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["projects", orgId] });

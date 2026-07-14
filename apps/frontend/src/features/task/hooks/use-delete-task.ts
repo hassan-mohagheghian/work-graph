@@ -6,6 +6,7 @@ export function useDeleteTask(orgId?: string | null) {
 
   return useMutation({
     mutationFn: (taskId: any) => deleteTask(orgId!, taskId),
+    meta: { successMessage: "Task deleted" },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tasks", orgId] });
     },

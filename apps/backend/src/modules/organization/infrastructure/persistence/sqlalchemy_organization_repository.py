@@ -76,3 +76,15 @@ class SQLAlchemyOrganizationRepository(OrganizationRepository):
         rows = result.all()
 
         return [OrgSummary(id=r.id, name=r.name, role=r.role) for r in rows]
+
+    async def update(self, organization: Organization) -> None:
+        result = await self.session.execute(
+            select(OrganizationModel).where(OrganizationModel.id == organization.id)
+        )
+        org_model = result.scalar_one_or_none()
+
+        if not org_model:
+            raise ValueError("Organization not found")
+
+        org_model.name = organization.name
+        await self.session.commit()

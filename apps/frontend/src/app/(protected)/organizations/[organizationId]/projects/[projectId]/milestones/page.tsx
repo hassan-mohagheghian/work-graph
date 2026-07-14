@@ -10,6 +10,7 @@ import { useMilestones } from "@/features/planning/milestone/hooks/use-milestone
 import { useDeleteMilestone } from "@/features/planning/milestone/hooks/use-delete-milestone";
 import { CreateMilestoneSheet } from "@/features/planning/milestone/components/create-milestone-dialog";
 import { ROUTES } from "@/shared/routes";
+import { PageBody, SectionHeader } from "@/shared/layout/page-layout";
 
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -76,21 +77,19 @@ export default function MilestonesPage() {
   }, [roadmaps, selectedRoadmapId]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Milestones</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage milestones across your roadmaps
-          </p>
-        </div>
-        {selectedRoadmapId && (
-          <Button size="sm" onClick={() => setCreateMilestoneOpen(true)}>
-            <Plus className="size-4 mr-1" />
-            Add Milestone
-          </Button>
-        )}
-      </div>
+    <PageBody>
+      <SectionHeader
+        title="Milestones"
+        description="Manage milestones across your roadmaps"
+        actions={
+          selectedRoadmapId ? (
+            <Button size="sm" onClick={() => setCreateMilestoneOpen(true)}>
+              <Plus className="size-4 mr-1" />
+              Add Milestone
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Roadmap selector */}
       <Card>
@@ -205,6 +204,6 @@ export default function MilestonesPage() {
           onOpenChange={setCreateMilestoneOpen}
         />
       )}
-    </div>
+    </PageBody>
   );
 }

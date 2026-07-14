@@ -24,3 +24,7 @@ class OrganizationRepository(ABC):
     @abstractmethod
     async def list_by_user(self, user_id: UUID) -> list[Organization]:
         pass
+
+    @abstractmethod
+    async def update(self, organization: Organization) -> None:
+        pass

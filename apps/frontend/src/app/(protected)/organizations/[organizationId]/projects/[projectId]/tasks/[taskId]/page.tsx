@@ -11,6 +11,7 @@ import { getTasksByProject } from "@/features/task/api/get-tasks-by-project";
 import { useRoadmaps } from "@/features/planning/roadmap/hooks/use-roadmaps";
 import { useMilestones } from "@/features/planning/milestone/hooks/use-milestones";
 import { ROUTES } from "@/shared/routes";
+import { PageBody, PageLoading, SectionHeader } from "@/shared/layout/page-layout";
 
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -70,9 +71,9 @@ export default function TaskDetailPage() {
     }
   }, [task]);
 
-  if (isLoading) return <p className="p-6">Loading...</p>;
+  if (isLoading) return <PageLoading />;
 
-  if (!task) return <p className="p-6">Task not found</p>;
+  if (!task) return <p className="text-sm text-muted-foreground">Task not found</p>;
 
   function handleSave() {
     updateTask.mutate({
@@ -87,24 +88,26 @@ export default function TaskDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Task Details</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="destructive"
-            onClick={() => {
-              deleteTask.mutate(taskId);
-              router.push(ROUTES.PROJECT_TASKS(orgId, projectId));
-            }}
-          >
-            Delete
-          </Button>
-          <Button variant="outline" onClick={() => router.back()}>
-            Back
-          </Button>
-        </div>
-      </div>
+    <PageBody>
+      <SectionHeader
+        title="Task Details"
+        actions={
+          <div className="flex gap-2">
+            <Button
+              variant="destructive"
+              onClick={() => {
+                deleteTask.mutate(taskId);
+                router.push(ROUTES.PROJECT_TASKS(orgId, projectId));
+              }}
+            >
+              Delete
+            </Button>
+            <Button variant="outline" onClick={() => router.back()}>
+              Back
+            </Button>
+          </div>
+        }
+      />
 
       <Separator />
 
@@ -202,6 +205,6 @@ export default function TaskDetailPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageBody>
   );
 }

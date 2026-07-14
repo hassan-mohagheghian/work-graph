@@ -6,6 +6,7 @@ export function useActivateRoadmap(orgId?: string | null) {
 
   return useMutation({
     mutationFn: (roadmapId: string) => activateRoadmap(orgId!, roadmapId),
+    meta: { successMessage: "Roadmap activated" },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["roadmaps", orgId] });
     },

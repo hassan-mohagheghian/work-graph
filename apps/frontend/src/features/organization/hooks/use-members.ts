@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import {
   OrgMember,
   getMembers,
@@ -9,6 +10,8 @@ import {
   addMember,
   Role,
 } from "../api/members";
+import { getErrorMessage } from "@/shared/lib/errors";
+import { notify } from "@/shared/lib/notify";
 
 export function useMembers(orgId: string | null) {
   const [members, setMembers] = useState<OrgMember[]>([]);
@@ -18,9 +21,14 @@ export function useMembers(orgId: string | null) {
     if (!orgId) return;
 
     setLoading(true);
-    const data = await getMembers(orgId);
-    setMembers(data);
-    setLoading(false);
+    try {
+      const data = await getMembers(orgId);
+      setMembers(data);
+    } catch (error) {
+      notify.error(getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -30,22 +38,37 @@ export function useMembers(orgId: string | null) {
   async function changeRole(userId: string, role: Role) {
     if (!orgId) return;
 
-    await updateMemberRole(orgId, userId, role);
-    await load();
+    try {
+      await updateMemberRole(orgId, userId, role);
+      await load();
+      notify.success("Member role updated");
+    } catch (error) {
+      notify.error(getErrorMessage(error));
+    }
   }
 
   async function remove(userId: string) {
     if (!orgId) return;
 
-    await removeMember(orgId, userId);
-    await load();
+    try {
+      await removeMember(orgId, userId);
+      await load();
+      notify.success("Member removed");
+    } catch (error) {
+      notify.error(getErrorMessage(error));
+    }
   }
 
   async function invite(email: string, role: Role) {
     if (!orgId) return;
 
-    await addMember(orgId, email, role);
-    await load();
+    try {
+      await addMember(orgId, email, role);
+      await load();
+      notify.success("Member invited");
+    } catch (error) {
+      notify.error(getErrorMessage(error));
+    }
   }
 
   return {

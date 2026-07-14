@@ -1,11 +1,12 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { PageBody, SectionHeader } from "@/shared/layout/page-layout";
 
 export default function ProjectSettingsPage() {
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">Project Settings</h2>
+    <PageBody>
+      <SectionHeader title="Project Settings" />
 
       <Card>
         <CardHeader>
@@ -17,6 +18,6 @@ export default function ProjectSettingsPage() {
           </p>
         </CardContent>
       </Card>
-    </div>
+    </PageBody>
   );
 }

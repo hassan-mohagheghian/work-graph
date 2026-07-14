@@ -6,6 +6,7 @@ export function useDeleteRoadmap(orgId?: string | null) {
 
   return useMutation({
     mutationFn: (roadmapId: string) => deleteRoadmap(orgId!, roadmapId),
+    meta: { successMessage: "Roadmap deleted" },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["roadmaps", orgId] });
     },

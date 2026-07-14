@@ -8,6 +8,7 @@ import { useOrg } from "@/shared/context/org-context";
 import { useMilestone } from "@/features/planning/milestone/hooks/use-milestone";
 import { useTasksByProject } from "@/features/task/hooks/use-tasks-by-project";
 import { ROUTES } from "@/shared/routes";
+import { PageBody, PageLoading } from "@/shared/layout/page-layout";
 
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -46,20 +47,20 @@ export default function MilestoneDetailPage() {
   const { data: milestone, isLoading } = useMilestone(orgId, milestoneId);
   const { data: tasks = [] } = useTasksByProject(orgId, projectId);
 
-  if (isLoading) return <p className="p-6">Loading...</p>;
+  if (isLoading) return <PageLoading />;
 
-  if (!milestone) return <p className="p-6">Milestone not found</p>;
+  if (!milestone) return <p className="text-sm text-muted-foreground">Milestone not found</p>;
 
   const milestoneTasks = tasks.filter(
     (task: any) => task.milestone_id === milestoneId
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
+    <PageBody>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 space-y-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">{milestone.title}</h1>
+            <h2 className="text-xl font-semibold tracking-tight">{milestone.title}</h2>
             <Badge
               variant="secondary"
               className={`text-xs ${STATUS_COLORS[milestone.status]}`}
@@ -132,6 +133,6 @@ export default function MilestoneDetailPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageBody>
   );
 }

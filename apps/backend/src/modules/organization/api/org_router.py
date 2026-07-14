@@ -22,6 +22,12 @@ from src.modules.organization.application.commands.create_org.command import (
 from src.modules.organization.application.commands.create_org.handler import (
     CreateOrgHandler,
 )
+from src.modules.organization.application.commands.update_org.command import (
+    UpdateOrgCommand,
+)
+from src.modules.organization.application.commands.update_org.handler import (
+    UpdateOrgHandler,
+)
 from src.modules.organization.application.commands.delete_org_member.command import (
     DeleteOrgMemberCommand,
 )
@@ -47,7 +53,10 @@ from src.modules.organization.application.queries.list_membership_by_org.query i
     OrgMembersQuery,
 )
 from src.modules.organization.domain.entities.membership import OrgMembership
-from src.modules.organization.domain.exceptions import OrganizationAlreadyExistsError
+from src.modules.organization.domain.exceptions import (
+    OrganizationAlreadyExistsError,
+    OrganizationNotFoundError,
+)
 from src.modules.organization.domain.repositories.org_membership_repo import (
     OrgMembershipRepo,
 )
@@ -81,6 +90,10 @@ class CreateOrganizationRequest(BaseModel):
     name: str
 
 
+class UpdateOrganizationRequest(BaseModel):
+    name: str | None = None
+
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_org(
     body: CreateOrganizationRequest,
@@ -107,6 +120,29 @@ async def get_org(org_id: UUID, repo=Depends(get_org_repo)):
     handler = GetOrgHandler(org_repo=repo)
     query = GetOrgQuery(org_id=org_id)
     return await handler.handle(query=query)
+
+
+@router.patch("/{org_id}")
+async def update_org(
+    org_id: UUID,
+    body: UpdateOrganizationRequest,
+    repo=Depends(get_org_repo),
+    _membership=Depends(require_org_role(OrgRole.OWNER)),
+):
+    handler = UpdateOrgHandler(org_repo=repo)
+    try:
+        org = await handler.handle(
+            UpdateOrgCommand(org_id=org_id, name=body.name)
+        )
+        return {
+            "id": str(org.id),
+            "name": org.name,
+            "created_at": org.created_at.isoformat(),
+        }
+    except OrganizationNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except OrganizationAlreadyExistsError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.get("")

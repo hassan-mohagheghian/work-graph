@@ -6,6 +6,7 @@ export function useCreateTask(orgId?: string | null) {
 
   return useMutation({
     mutationFn: createTask,
+    meta: { successMessage: "Task created" },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["tasks", orgId],

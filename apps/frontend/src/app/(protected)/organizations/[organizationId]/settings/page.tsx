@@ -4,6 +4,11 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
 import { getOrganization } from "@/features/organization/api/get-organizations";
+import {
+  PageBody,
+  PageLoading,
+  SectionHeader,
+} from "@/shared/layout/page-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 
 export default function OrganizationSettingsPage() {
@@ -16,11 +21,11 @@ export default function OrganizationSettingsPage() {
     enabled: !!orgId,
   });
 
-  if (isLoading) return <p className="p-6">Loading...</p>;
+  if (isLoading) return <PageLoading />;
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-xl font-semibold">Organization Settings</h1>
+    <PageBody>
+      <SectionHeader title="Settings" />
 
       <Card>
         <CardHeader>
@@ -32,6 +37,6 @@ export default function OrganizationSettingsPage() {
           </p>
         </CardContent>
       </Card>
-    </div>
+    </PageBody>
   );
 }

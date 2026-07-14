@@ -14,6 +14,7 @@ import { EditRoadmapSheet } from "../roadmap/components/edit-roadmap-dialog";
 import { CreateMilestoneSheet } from "../milestone/components/create-milestone-dialog";
 import { EditMilestoneSheet } from "../milestone/components/edit-milestone-dialog";
 import { MilestoneSection } from "../milestone/components/milestone-section";
+import { SectionHeader } from "@/shared/layout/page-layout";
 
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -144,23 +145,25 @@ export function RoadmapView({ projectId }: { projectId: string }) {
   if (loadingRoadmaps) return <p>Loading roadmaps...</p>;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">Roadmaps</h2>
-        <Button size="sm" className="h-7 text-xs" onClick={() => setCreateRoadmapOpen(true)}>
-          <Plus className="size-3.5 mr-1" />
-          Create Roadmap
-        </Button>
-      </div>
+    <div className="space-y-4">
+      <SectionHeader
+        title="Roadmaps"
+        actions={
+          <Button size="sm" onClick={() => setCreateRoadmapOpen(true)}>
+            <Plus className="size-4 mr-1" />
+            Create Roadmap
+          </Button>
+        }
+      />
 
       {roadmaps.length === 0 && (
         <Card>
-          <CardContent className="p-6 text-center">
-            <p className="text-sm text-muted-foreground mb-3">
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground mb-4">
               No roadmaps yet. Create one to start planning your project.
             </p>
-            <Button size="sm" onClick={() => setCreateRoadmapOpen(true)}>
-              <Plus className="size-3.5 mr-1" />
+            <Button onClick={() => setCreateRoadmapOpen(true)}>
+              <Plus className="size-4 mr-1" />
               Create Roadmap
             </Button>
           </CardContent>

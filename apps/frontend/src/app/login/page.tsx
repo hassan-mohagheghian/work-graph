@@ -9,12 +9,11 @@ export default function LoginPage() {
   if (isLoading) {
     return null;
   }
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full flex justify-center px-4">
-        {!!user && <p>You logged in</p>}
-        {!user && <LoginForm />}
-      </div>
-    </main>
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
+      {!!user && <p>You logged in</p>}
+      {!user && <LoginForm />}
+    </div>
   );
 }

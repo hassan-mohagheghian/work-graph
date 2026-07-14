@@ -127,3 +127,7 @@ docker-compose.override.yml
 
 # Uploaded files
 uploads/.mimocode/
+
+# Extras
+.mimocode
+apps/backend/uploads

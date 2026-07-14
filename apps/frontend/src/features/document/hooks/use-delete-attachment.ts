@@ -12,6 +12,7 @@ export function useDeleteAttachment(orgId?: string | null) {
       documentId: string;
       attachmentId: string;
     }) => deleteAttachment(orgId!, documentId, attachmentId),
+    meta: { successMessage: "Attachment removed" },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", orgId] });
     },

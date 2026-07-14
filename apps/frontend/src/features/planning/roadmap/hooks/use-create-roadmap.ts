@@ -6,6 +6,7 @@ export function useCreateRoadmap(orgId?: string | null) {
 
   return useMutation({
     mutationFn: createRoadmap,
+    meta: { successMessage: "Roadmap created" },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roadmaps", orgId] });
     },

@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 import { useOrg } from "@/shared/context/org-context";
 import { useTasksByProject } from "@/features/task/hooks/use-tasks-by-project";
 import { TaskBoard } from "@/features/task/components/task-board";
+import { CreateTaskSheet } from "@/features/task/components/create-task-sheet";
+import { PageBody, SectionHeader } from "@/shared/layout/page-layout";
 
+import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
+import { Plus } from "lucide-react";
 
 export default function ProjectTasksPage() {
   const params = useParams();
@@ -22,21 +26,33 @@ export default function ProjectTasksPage() {
 
   const { data: tasks = [], isLoading } = useTasksByProject(orgId, projectId);
 
+  const [createOpen, setCreateOpen] = useState(false);
+
   if (isLoading) return <p>Loading tasks...</p>;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Tasks</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Drag tasks between columns or click + to create
-        </p>
-      </div>
+    <PageBody>
+      <SectionHeader
+        title="Tasks"
+        description="Drag tasks between columns or click + to create"
+        actions={
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <Plus className="size-4 mr-1" />
+            Create Task
+          </Button>
+        }
+      />
 
       {tasks.length === 0 && (
         <Card>
-          <CardContent className="p-6 text-muted-foreground">
-            No tasks yet. Click + in any column to create one.
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground mb-4">
+              No tasks yet. Create one to get started.
+            </p>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="size-4 mr-1" />
+              Create Task
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -44,6 +60,12 @@ export default function ProjectTasksPage() {
       {tasks.length > 0 && (
         <TaskBoard tasks={tasks} projectId={projectId} />
       )}
-    </div>
+
+      <CreateTaskSheet
+        projectId={projectId}
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+      />
+    </PageBody>
   );
 }

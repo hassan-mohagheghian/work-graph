@@ -6,6 +6,7 @@ export function useCreateDocument(orgId?: string | null) {
 
   return useMutation({
     mutationFn: createDocument,
+    meta: { successMessage: "Document created" },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", orgId] });
     },

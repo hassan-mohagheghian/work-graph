@@ -8,6 +8,7 @@ export function useUpdateProjectMemberRole(projectId: string) {
   return useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
       updateProjectMemberRole(projectId, userId, role),
+    meta: { successMessage: "Member role updated" },
 
     onSuccess: () => {
       queryClient.invalidateQueries({

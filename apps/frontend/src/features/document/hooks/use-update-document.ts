@@ -12,6 +12,7 @@ export function useUpdateDocument(orgId?: string | null) {
       documentId: string;
       data: { title?: string; description?: string };
     }) => updateDocument(orgId!, documentId, data),
+    meta: { successMessage: "Document updated" },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", orgId] });
     },

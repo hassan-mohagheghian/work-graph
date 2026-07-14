@@ -59,42 +59,36 @@ export default function ProjectLayout({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="px-6 pt-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href={ROUTES.ORG_PROJECTS(orgId)}>
-                Projects
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{projectName}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+    <div className="space-y-4 pb-6">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href={ROUTES.ORG_PROJECTS(orgId)}>
+              Projects
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{projectName}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <div className="px-6">
-        <h1 className="text-2xl font-bold">{projectName}</h1>
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">{projectName}</h1>
 
       <Separator />
 
-      <div className="px-6">
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList variant="line">
-            {TABS.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </div>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList variant="line">
+          {TABS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      <div className="px-6 pb-6">{children}</div>
+      {children}
     </div>
   );
 }

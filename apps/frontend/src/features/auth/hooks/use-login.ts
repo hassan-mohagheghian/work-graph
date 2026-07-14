@@ -7,6 +7,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: login,
+    meta: { successMessage: "Signed in successfully" },
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({

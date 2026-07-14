@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 
 import { useMembers } from "@/features/organization/hooks/use-members";
+import { InviteMemberSheet } from "@/features/organization/components/invite-member-sheet";
+import { PageBody, PageLoading, SectionHeader } from "@/shared/layout/page-layout";
 
-import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
-
 import {
   Table,
   TableBody,
@@ -24,48 +24,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import { Plus } from "lucide-react";
 
 export default function MembersPage() {
   const params = useParams();
   const orgId = params.organizationId as string;
 
-  const { members, loading, changeRole, remove, invite } = useMembers(orgId);
+  const { members, loading, changeRole, remove } = useMembers(orgId);
 
-  const [email, setEmail] = useState("");
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   if (loading) {
-    return <div className="p-6">Loading...</div>;
+    return <PageLoading />;
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Members</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage organization members
-        </p>
-      </div>
+    <PageBody>
+      <SectionHeader
+        title="Members"
+        description="Manage organization members"
+        actions={
+          <Button size="sm" onClick={() => setInviteOpen(true)}>
+            <Plus className="size-4 mr-1" />
+            Invite Member
+          </Button>
+        }
+      />
 
-      {/* INVITE SECTION */}
-      <div className="flex gap-2 max-w-md">
-        <Input
-          placeholder="Invite user by email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <Button
-          onClick={() => {
-            invite(email, "member");
-            setEmail("");
-          }}
-        >
-          Invite
-        </Button>
-      </div>
-
-      {/* TABLE */}
-      <div className="border rounded-lg">
+      <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -88,10 +74,8 @@ export default function MembersPage() {
             ) : (
               members.map((m) => (
                 <TableRow key={m.user_id}>
-                  {/* EMAIL */}
                   <TableCell className="font-medium">{m.email}</TableCell>
 
-                  {/* ROLE */}
                   <TableCell>
                     <Select
                       value={m.role}
@@ -111,7 +95,6 @@ export default function MembersPage() {
                     </Select>
                   </TableCell>
 
-                  {/* ACTIONS */}
                   <TableCell className="text-right">
                     <Button
                       variant="destructive"
@@ -127,6 +110,12 @@ export default function MembersPage() {
           </TableBody>
         </Table>
       </div>
-    </div>
+
+      <InviteMemberSheet
+        orgId={orgId}
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+      />
+    </PageBody>
   );
 }

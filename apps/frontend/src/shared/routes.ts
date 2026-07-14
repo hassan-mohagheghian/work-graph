@@ -11,7 +11,6 @@ export const ROUTES = {
   ORG_PROJECTS: (id: string) => `/organizations/${id}/projects`,
 
   // Project
-  PROJECT_NEW: (orgId: string) => `/organizations/${orgId}/projects/new`,
   PROJECT_DETAIL: (orgId: string, pid: string) =>
     `/organizations/${orgId}/projects/${pid}`,
   PROJECT_ROADMAP: (orgId: string, pid: string) =>

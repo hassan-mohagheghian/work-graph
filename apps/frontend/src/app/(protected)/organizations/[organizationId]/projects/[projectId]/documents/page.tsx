@@ -8,6 +8,7 @@ import { useDocuments } from "@/features/document/hooks/use-documents";
 import { useUploadAttachment } from "@/features/document/hooks/use-upload-attachment";
 import { CreateDocumentSheet } from "@/features/document/components/create-document-dialog";
 import { EditDocumentSheet } from "@/features/document/components/edit-document-sheet";
+import { SectionHeader } from "@/shared/layout/page-layout";
 
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -42,18 +43,16 @@ export default function ProjectDocumentsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Documents</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Store project knowledge for AI planning
-          </p>
-        </div>
-        <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="size-4 mr-1" />
-          Create Document
-        </Button>
-      </div>
+      <SectionHeader
+        title="Documents"
+        description="Store project knowledge for AI planning"
+        actions={
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <Plus className="size-4 mr-1" />
+            Create Document
+          </Button>
+        }
+      />
 
       {documents.length === 0 && (
         <Card>

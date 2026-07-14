@@ -7,6 +7,7 @@ export function useRemoveProjectMember(projectId: string) {
 
   return useMutation({
     mutationFn: (userId: string) => removeProjectMember(projectId, userId),
+    meta: { successMessage: "Member removed from project" },
 
     onSuccess: () => {
       queryClient.invalidateQueries({

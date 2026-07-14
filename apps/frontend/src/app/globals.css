@@ -50,6 +50,12 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Page layout — keep in sync with shared/layout/page-layout.tsx */
+  --spacing-page-x: 1rem;
+  --spacing-page-y: 1.5rem;
+  --spacing-page-section: 1.5rem;
+  --spacing-page-section-tight: 1rem;
 }
 
 :root {

@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import { getErrorMessage } from "./errors";
+
 export const api = axios.create({
   baseURL: "http://localhost:8000",
   withCredentials: true,
@@ -10,9 +12,5 @@ export const api = axios.create({
 
 api.interceptors.response.use(
   (res) => res,
-  (error) => {
-    const message = error.response?.data?.detail || "Unexpected error";
-
-    return Promise.reject(new Error(message));
-  },
+  (error) => Promise.reject(new Error(getErrorMessage(error))),
 );

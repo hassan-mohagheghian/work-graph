@@ -12,6 +12,7 @@ export function useUploadAttachment(orgId?: string | null) {
       documentId: string;
       file: File;
     }) => uploadAttachment(orgId!, documentId, file),
+    meta: { successMessage: "Attachment uploaded" },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", orgId] });
     },

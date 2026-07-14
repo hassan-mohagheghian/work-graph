@@ -12,13 +12,6 @@ export type Organization = {
 export async function createOrganization(
   data: CreateOrganizationRequest,
 ): Promise<Organization> {
-  try {
-    const res = await api.post("/organizations", data);
-
-    return res.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    const message = error?.message || "Something wen wrong";
-    throw new Error(message);
-  }
+  const res = await api.post("/organizations", data);
+  return res.data;
 }
